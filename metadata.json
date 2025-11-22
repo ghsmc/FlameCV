@@ -1,0 +1,5 @@
+{
+  "name": "FlameCV",
+  "description": "A brutally honest, high-signal resume critique powered by Gemini.",
+  "requestFramePermissions": []
+}
