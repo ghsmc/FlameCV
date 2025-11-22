@@ -7,8 +7,18 @@ export enum AppState {
   ERROR = 'ERROR',
 }
 
-export interface RoastResult {
-  markdown: string;
+export interface TargetCompany {
+  name: string;
+  domain: string;
+  reason: string;
+}
+
+export interface AnalysisData {
+  score: number;
+  grade: string;
+  summary: string;
+  markdownContent: string;
+  targetCompanies?: TargetCompany[];
 }
 
 export interface FileData {

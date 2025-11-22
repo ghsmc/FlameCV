@@ -3,7 +3,7 @@ import { FileUpload } from './components/FileUpload';
 import { LoadingScreen } from './components/LoadingScreen';
 import { RoastResult } from './components/RoastResult';
 import { QuoteCarousel } from './components/QuoteCarousel';
-import { AppState, FileData } from './types';
+import { AppState, FileData, AnalysisData } from './types';
 import { generateRoast, generateImprovement } from './services/gemini';
 import { Logo } from './components/Logo';
 import { LOADING_MESSAGES, FIXING_MESSAGES } from './constants';
@@ -11,8 +11,8 @@ import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>(AppState.IDLE);
-  const [roastContent, setRoastContent] = useState<string>('');
-  const [fixedContent, setFixedContent] = useState<string>('');
+  const [roastData, setRoastData] = useState<AnalysisData | null>(null);
+  const [fixedData, setFixedData] = useState<AnalysisData | null>(null);
   const [currentFile, setCurrentFile] = useState<FileData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
@@ -48,8 +48,8 @@ const App: React.FC = () => {
     setCurrentFile(file);
     
     try {
-      const roast = await generateRoast(file.base64, file.mimeType);
-      setRoastContent(roast);
+      const data = await generateRoast(file.base64, file.mimeType);
+      setRoastData(data);
       setState(AppState.COMPLETE);
     } catch (err: any) {
       console.error(err);
@@ -59,14 +59,18 @@ const App: React.FC = () => {
   };
 
   const handleFixResume = async () => {
-    if (!currentFile) return;
+    if (!currentFile || !roastData) return;
 
     setState(AppState.FIXING);
     setError(null);
 
     try {
-      const fixed = await generateImprovement(currentFile.base64, currentFile.mimeType, roastContent);
-      setFixedContent(fixed);
+      const data = await generateImprovement(
+        currentFile.base64, 
+        currentFile.mimeType, 
+        roastData.markdownContent
+      );
+      setFixedData(data);
       setState(AppState.FIX_COMPLETE);
     } catch (err: any) {
       console.error(err);
@@ -77,8 +81,8 @@ const App: React.FC = () => {
 
   const handleReset = () => {
     setState(AppState.IDLE);
-    setRoastContent('');
-    setFixedContent('');
+    setRoastData(null);
+    setFixedData(null);
     setCurrentFile(null);
     setError(null);
   };
@@ -165,9 +169,9 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {state === AppState.COMPLETE && (
+        {state === AppState.COMPLETE && roastData && (
           <RoastResult 
-            content={roastContent} 
+            data={roastData} 
             onReset={handleReset} 
             onFix={handleFixResume}
             title="The Verdict"
@@ -175,9 +179,9 @@ const App: React.FC = () => {
           />
         )}
 
-        {state === AppState.FIX_COMPLETE && (
+        {state === AppState.FIX_COMPLETE && fixedData && (
           <RoastResult 
-            content={fixedContent} 
+            data={fixedData} 
             onReset={handleReset} 
             title="Improved Resume"
             isFixMode={true}
