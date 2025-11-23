@@ -39,3 +39,10 @@ export interface FileData {
 export interface AnalysisError {
   message: string;
 }
+
+export interface HistoryItem {
+  id: string;
+  timestamp: number;
+  fileName: string;
+  analysis: AnalysisData;
+}

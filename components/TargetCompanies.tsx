@@ -1,73 +1,104 @@
 import React from 'react';
 import { CompanyMatch, CareerAdvice } from '../types';
-import { BriefcaseIcon, CurrencyDollarIcon, UserIcon } from '@heroicons/react/24/outline';
+import { BriefcaseIcon, CurrencyDollarIcon, UserIcon, ArrowTrendingUpIcon, ShieldCheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 interface TargetCompaniesProps {
   careerAdvice?: CareerAdvice;
-  // Fallback for older interface if needed, though we use careerAdvice primarily now
   companies?: CompanyMatch[];
 }
 
-const TierBadge: React.FC<{ tier: string }> = ({ tier }) => {
-  let colors = "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
-  if (tier === 'Reach') colors = "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
-  if (tier === 'Target') colors = "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
-  if (tier === 'Safety') colors = "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
-
+const TierSection: React.FC<{ title: string; icon: React.ReactNode; companies: CompanyMatch[]; colorClass: string }> = ({ title, icon, companies, colorClass }) => {
+  if (companies.length === 0) return null;
+  
   return (
-    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${colors}`}>
-      {tier}
-    </span>
+    <div className="flex flex-col gap-4">
+      <h4 className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 ${colorClass}`}>
+        {icon} {title}
+      </h4>
+      <div className="grid grid-cols-1 gap-3">
+        {companies.map((company, index) => (
+          <div 
+            key={index}
+            className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 dark:border-white/5 bg-white dark:bg-white/5 hover:border-gray-200 dark:hover:border-white/10 transition-all"
+          >
+            <img 
+              src={`https://img.logo.dev/${company.domain}?token=pk_c2nKhfMyRIOeCjrk-6-RRw`}
+              alt={`${company.name} logo`}
+              className="w-12 h-12 rounded-lg object-contain bg-white border border-gray-100 shrink-0"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${company.name}&background=random`;
+              }}
+            />
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h5 className="font-bold text-gray-900 dark:text-white text-sm">
+                  {company.name}
+                </h5>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                {company.reason}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
 export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, companies }) => {
-  // Handle fallback if only companies list is provided (backward compatibility)
   const displayCompanies = careerAdvice?.companyMatches || companies || [];
   
   if (!careerAdvice && displayCompanies.length === 0) return null;
 
+  // Group by tiers
+  const reach = displayCompanies.filter(c => c.tier === 'Reach');
+  const target = displayCompanies.filter(c => c.tier === 'Target');
+  const safety = displayCompanies.filter(c => c.tier === 'Safety');
+
   return (
     <div className="mt-16 pt-8 border-t border-gray-100 dark:border-gray-800 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
       
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-10">
         
         {/* Reality Check Header */}
         <div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight flex items-center gap-2">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight flex items-center gap-2">
             <span className="text-2xl">🔮</span> Career Reality Check
           </h3>
           {careerAdvice?.realityCheck && (
-            <p className="text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl text-base border-l-4 border-orange-500 pl-4 py-1 italic">
-              "{careerAdvice.realityCheck}"
-            </p>
+            <div className="bg-orange-50 dark:bg-orange-900/10 border-l-4 border-orange-500 p-4 rounded-r-lg">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm italic">
+                "{careerAdvice.realityCheck}"
+              </p>
+            </div>
           )}
         </div>
 
         {/* Stats Grid */}
         {careerAdvice && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10">
-              <div className="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
-                <UserIcon className="w-4 h-4" /> Assessed Level
+            <div className="bg-white dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+              <div className="flex items-center gap-2 mb-2 text-gray-400 dark:text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                <UserIcon className="w-3.5 h-3.5" /> Level
               </div>
-              <div className="font-bold text-gray-900 dark:text-white">{careerAdvice.currentLevel}</div>
+              <div className="font-bold text-gray-900 dark:text-white text-lg">{careerAdvice.currentLevel}</div>
             </div>
             
-            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10">
-              <div className="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
-                <CurrencyDollarIcon className="w-4 h-4" /> Market Value
+            <div className="bg-white dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+              <div className="flex items-center gap-2 mb-2 text-gray-400 dark:text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                <CurrencyDollarIcon className="w-3.5 h-3.5" /> Est. Comp
               </div>
-              <div className="font-bold text-gray-900 dark:text-white">{careerAdvice.estimatedSalary}</div>
+              <div className="font-bold text-gray-900 dark:text-white text-lg">{careerAdvice.estimatedSalary}</div>
             </div>
 
-            <div className="bg-gray-50 dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10">
-              <div className="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider">
-                <BriefcaseIcon className="w-4 h-4" /> Target Roles
+            <div className="bg-white dark:bg-white/5 p-4 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm">
+              <div className="flex items-center gap-2 mb-2 text-gray-400 dark:text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                <BriefcaseIcon className="w-3.5 h-3.5" /> Target Roles
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {careerAdvice.recommendedRoles.map((role, i) => (
-                  <span key={i} className="text-xs bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded text-gray-800 dark:text-gray-200">
+                  <span key={i} className="text-[10px] font-medium bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300">
                     {role}
                   </span>
                 ))}
@@ -76,40 +107,28 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
           </div>
         )}
 
-        {/* Company Matches */}
-        <div>
-           <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
-            Potential Matches
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {displayCompanies.map((company, index) => (
-              <div 
-                key={index}
-                className="flex flex-col p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0B1121] hover:border-gray-300 dark:hover:border-gray-700 transition-colors shadow-sm h-full"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <img 
-                    src={`https://img.logo.dev/${company.domain}?token=pk_c2nKhfMyRIOeCjrk-6-RRw`}
-                    alt={`${company.name} logo`}
-                    className="w-10 h-10 rounded object-contain bg-white border border-gray-100"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${company.name}&background=random`;
-                    }}
-                  />
-                  {company.tier && <TierBadge tier={company.tier} />}
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white mb-1">
-                    {company.name}
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                    {company.reason}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Tiered Company Matches */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <TierSection 
+            title="Reach (Dream)" 
+            icon={<SparklesIcon className="w-4 h-4" />} 
+            companies={reach} 
+            colorClass="text-purple-600 dark:text-purple-400"
+          />
+          <TierSection 
+            title="Target (Realistic)" 
+            icon={<ArrowTrendingUpIcon className="w-4 h-4" />} 
+            companies={target} 
+            colorClass="text-green-600 dark:text-green-400"
+          />
+          <TierSection 
+            title="Safety (Solid)" 
+            icon={<ShieldCheckIcon className="w-4 h-4" />} 
+            companies={safety} 
+            colorClass="text-blue-600 dark:text-blue-400"
+          />
         </div>
+
       </div>
     </div>
   );

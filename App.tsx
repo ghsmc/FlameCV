@@ -3,7 +3,8 @@ import { FileUpload } from './components/FileUpload';
 import { LoadingScreen } from './components/LoadingScreen';
 import { RoastResult } from './components/RoastResult';
 import { QuoteCarousel } from './components/QuoteCarousel';
-import { AppState, FileData, AnalysisData } from './types';
+import { HistoryList } from './components/HistoryList';
+import { AppState, FileData, AnalysisData, HistoryItem } from './types';
 import { generateRoast, generateImprovement } from './services/gemini';
 import { Logo } from './components/Logo';
 import { LOADING_MESSAGES, FIXING_MESSAGES } from './constants';
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [roastCount, setRoastCount] = useState<number>(0);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
     // Theme Initialization
@@ -38,6 +40,16 @@ const App: React.FC = () => {
     } else {
       setRoastCount(0);
     }
+
+    // Load History
+    const storedHistory = localStorage.getItem('roastHistory');
+    if (storedHistory) {
+      try {
+        setHistory(JSON.parse(storedHistory));
+      } catch (e) {
+        console.error("Failed to parse history", e);
+      }
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -50,6 +62,32 @@ const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
+  };
+
+  const addToHistory = (file: FileData, data: AnalysisData) => {
+    const newItem: HistoryItem = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      fileName: file.name,
+      analysis: data
+    };
+    // Keep last 10 items to avoid quota issues
+    const newHistory = [newItem, ...history].slice(0, 10);
+    setHistory(newHistory);
+    localStorage.setItem('roastHistory', JSON.stringify(newHistory));
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('roastHistory');
+  };
+
+  const handleHistorySelect = (item: HistoryItem) => {
+    setRoastData(item.analysis);
+    // We don't have the base64 for history items to save space, so we can't "Fix" them immediately 
+    // without re-uploading, but we can view the result.
+    setCurrentFile({ name: item.fileName, base64: '', mimeType: 'application/pdf' }); 
+    setState(AppState.COMPLETE);
   };
 
   const handleFileSelect = async (file: FileData) => {
@@ -65,6 +103,7 @@ const App: React.FC = () => {
     try {
       const data = await generateRoast(file.base64, file.mimeType);
       setRoastData(data);
+      addToHistory(file, data);
       setState(AppState.COMPLETE);
     } catch (err: any) {
       console.error(err);
@@ -74,7 +113,10 @@ const App: React.FC = () => {
   };
 
   const handleFixResume = async () => {
-    if (!currentFile || !roastData) return;
+    if (!currentFile || !roastData || !currentFile.base64) {
+      setError("Cannot fix resume from history. Please re-upload the file.");
+      return;
+    }
 
     setState(AppState.FIXING);
     setError(null);
@@ -142,29 +184,34 @@ const App: React.FC = () => {
             <QuoteCarousel />
 
             {/* Live Counter */}
-            {roastCount > 0 && (
-              <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-2 delay-200">
-                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 shadow-sm">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-                  </span>
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300 tabular-nums tracking-tight">
-                    <span className="font-bold text-gray-900 dark:text-white">{roastCount.toLocaleString()}</span> resumes roasted
-                  </span>
-                </div>
+            <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-2 delay-200">
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 shadow-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                </span>
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 tabular-nums tracking-tight">
+                  <span className="font-bold text-gray-900 dark:text-white">{roastCount.toLocaleString()}</span> resumes roasted
+                </span>
               </div>
-            )}
+            </div>
             
             <div className="w-full mt-4">
               <FileUpload onFileSelect={handleFileSelect} />
             </div>
+
+            {/* Recent History */}
+            <HistoryList 
+              history={history} 
+              onSelect={handleHistorySelect} 
+              onClear={clearHistory} 
+            />
             
             <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 w-full border-t border-gray-100 dark:border-white/5 pt-12">
               {[
                 { title: "Brutal Honesty", desc: "We strip away the fluff, buzzwords, and corporate oatmeal." },
                 { title: "Tactical Fixes", desc: "Don't just get burned. Get rewrites you can copy-paste." },
-                { title: "Private & Secure", desc: "Files are processed ephemerally. We do not store your data." }
+                { title: "Local History", desc: "Your data is stored locally on your device so you can revisit it." }
               ].map((item, i) => (
                 <div key={i} className="text-left group">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2 tracking-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{item.title}</h3>
@@ -203,7 +250,7 @@ const App: React.FC = () => {
           <RoastResult 
             data={roastData} 
             onReset={handleReset} 
-            onFix={handleFixResume}
+            onFix={currentFile?.base64 ? handleFixResume : undefined}
             title="The Verdict"
             isFixMode={false}
           />
