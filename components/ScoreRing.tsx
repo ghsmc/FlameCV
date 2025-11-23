@@ -7,17 +7,17 @@ interface ScoreRingProps {
 }
 
 export const ScoreRing: React.FC<ScoreRingProps> = ({ score, grade, size = 'lg' }) => {
-  // Increased dimensions significantly to provide breathing room (whitespace)
-  const dim = size === 'lg' ? 120 : 60;
-  const stroke = size === 'lg' ? 8 : 4;
+  // Dimensions - reduced slightly to avoid being "too large" but still prominent
+  const dim = size === 'lg' ? 80 : 40;
+  const stroke = size === 'lg' ? 6 : 3;
   const radius = (dim - stroke) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDashoffset = circumference - (score / 100) * circumference;
   
-  // Adjusted font sizes and spacing
-  const fontSize = size === 'lg' ? 'text-4xl' : 'text-sm';
-  const subFontSize = size === 'lg' ? 'text-sm' : 'text-[10px]';
-  const gap = size === 'lg' ? 'mt-1' : 'mt-0.5';
+  // Font Sizes
+  const fontSize = size === 'lg' ? 'text-2xl' : 'text-xs';
+  const subFontSize = size === 'lg' ? 'text-xs' : 'text-[8px]';
+  const gap = size === 'lg' ? 'mt-1' : 'mt-0';
 
   // Brutally Honest Color Scale
   // 0-59: Red (Fail / Needs major work)
@@ -63,7 +63,7 @@ export const ScoreRing: React.FC<ScoreRingProps> = ({ score, grade, size = 'lg' 
       </svg>
       
       {/* Centered Content */}
-      <div className="absolute flex flex-col items-center justify-center pt-1">
+      <div className="absolute flex flex-col items-center justify-center pt-0.5">
         <span className={`font-bold text-gray-900 dark:text-white leading-none ${fontSize}`}>
           {grade}
         </span>

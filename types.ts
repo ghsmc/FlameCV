@@ -7,10 +7,19 @@ export enum AppState {
   ERROR = 'ERROR',
 }
 
-export interface TargetCompany {
+export interface CompanyMatch {
   name: string;
   domain: string;
+  tier: 'Reach' | 'Target' | 'Safety';
   reason: string;
+}
+
+export interface CareerAdvice {
+  currentLevel: string;
+  estimatedSalary: string;
+  recommendedRoles: string[];
+  realityCheck: string;
+  companyMatches: CompanyMatch[];
 }
 
 export interface AnalysisData {
@@ -18,7 +27,7 @@ export interface AnalysisData {
   grade: string;
   summary: string;
   markdownContent: string;
-  targetCompanies?: TargetCompany[];
+  careerAdvice?: CareerAdvice;
 }
 
 export interface FileData {

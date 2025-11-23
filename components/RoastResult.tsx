@@ -112,8 +112,8 @@ export const RoastResult: React.FC<RoastResultProps> = ({
       {/* Footer Actions */}
       <div className="mt-8 flex flex-col items-center">
         {/* Show target companies only in roast mode */}
-        {!isFixMode && data.targetCompanies && (
-          <TargetCompanies companies={data.targetCompanies} />
+        {!isFixMode && data.careerAdvice && (
+          <TargetCompanies careerAdvice={data.careerAdvice} />
         )}
 
         <div className="mt-16 pt-8 border-t border-gray-100 dark:border-gray-800 w-full flex flex-col items-center">

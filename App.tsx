@@ -31,15 +31,12 @@ const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
 
-    // Roast Count Initialization
-    const storedCount = localStorage.getItem('globalRoastCount');
+    // Roast Count Initialization - Tracks LOCAL user uploads only
+    const storedCount = localStorage.getItem('userRoastCount');
     if (storedCount) {
       setRoastCount(parseInt(storedCount, 10));
     } else {
-      // Start with a realistic "live" number between 14,200 and 14,700
-      const baseCount = 14200 + Math.floor(Math.random() * 500);
-      setRoastCount(baseCount);
-      localStorage.setItem('globalRoastCount', baseCount.toString());
+      setRoastCount(0);
     }
   }, []);
 
@@ -63,7 +60,7 @@ const App: React.FC = () => {
     // Increment roast count
     const newCount = roastCount + 1;
     setRoastCount(newCount);
-    localStorage.setItem('globalRoastCount', newCount.toString());
+    localStorage.setItem('userRoastCount', newCount.toString());
     
     try {
       const data = await generateRoast(file.base64, file.mimeType);
@@ -145,17 +142,19 @@ const App: React.FC = () => {
             <QuoteCarousel />
 
             {/* Live Counter */}
-            <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-2 delay-200">
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 shadow-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-                </span>
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 tabular-nums tracking-tight">
-                  <span className="font-bold text-gray-900 dark:text-white">{roastCount.toLocaleString()}</span> resumes roasted
-                </span>
+            {roastCount > 0 && (
+              <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-2 delay-200">
+                <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 shadow-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                  </span>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300 tabular-nums tracking-tight">
+                    <span className="font-bold text-gray-900 dark:text-white">{roastCount.toLocaleString()}</span> resumes roasted
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
             
             <div className="w-full mt-4">
               <FileUpload onFileSelect={handleFileSelect} />
@@ -165,7 +164,7 @@ const App: React.FC = () => {
               {[
                 { title: "Brutal Honesty", desc: "We strip away the fluff, buzzwords, and corporate oatmeal." },
                 { title: "Tactical Fixes", desc: "Don't just get burned. Get rewrites you can copy-paste." },
-                { title: "Private", desc: "Your data is processed ephemerally and never stored." }
+                { title: "Private & Secure", desc: "Files are processed ephemerally. We do not store your data." }
               ].map((item, i) => (
                 <div key={i} className="text-left group">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2 tracking-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{item.title}</h3>

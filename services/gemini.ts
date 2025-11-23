@@ -12,20 +12,36 @@ const ROAST_SCHEMA: Schema = {
     grade: { type: Type.STRING, description: "A letter grade (A, B, C, D, F)." },
     summary: { type: Type.STRING, description: "A short 1-2 sentence summary of the verdict." },
     markdownContent: { type: Type.STRING, description: "The full markdown text of the roast or critique." },
-    targetCompanies: {
-      type: Type.ARRAY,
-      description: "A list of 3-4 real tech companies that would fit this candidate profile.",
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          name: { type: Type.STRING, description: "Company name" },
-          domain: { type: Type.STRING, description: "Company domain name (e.g., stripe.com) for logo fetching" },
-          reason: { type: Type.STRING, description: "Why this is a good match" },
+    careerAdvice: {
+      type: Type.OBJECT,
+      description: "Detailed career matching and reality check.",
+      properties: {
+        realityCheck: { type: Type.STRING, description: "A brutal, 2-3 sentence assessment of their actual market value and level." },
+        currentLevel: { type: Type.STRING, description: "Their assessed level (e.g., Junior, Mid-Level, Senior, Staff)." },
+        estimatedSalary: { type: Type.STRING, description: "Estimated salary range for this profile (e.g., $80k - $100k)." },
+        recommendedRoles: { 
+          type: Type.ARRAY, 
+          items: { type: Type.STRING },
+          description: "List of 3-4 specific job titles they should target."
+        },
+        companyMatches: {
+          type: Type.ARRAY,
+          description: "A list of real companies that fit this profile, categorized by tier.",
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING, description: "Company name" },
+              domain: { type: Type.STRING, description: "Company domain name (e.g., stripe.com) for logo fetching" },
+              tier: { type: Type.STRING, enum: ["Reach", "Target", "Safety"], description: "Match category." },
+              reason: { type: Type.STRING, description: "Why this is a match" },
+            },
+          },
         },
       },
-    },
+      required: ["realityCheck", "currentLevel", "estimatedSalary", "recommendedRoles", "companyMatches"],
+    }
   },
-  required: ["score", "grade", "summary", "markdownContent", "targetCompanies"],
+  required: ["score", "grade", "summary", "markdownContent", "careerAdvice"],
 };
 
 const FIX_SCHEMA: Schema = {
@@ -61,7 +77,7 @@ export const generateRoast = async (
             },
           },
           {
-            text: "Analyze this resume. Provide a brutal roast, a score, a grade, and suggested target companies. Follow the JSON schema.",
+            text: "Analyze this resume. Provide a brutal roast, score, and a detailed career reality check (companies, roles, levels). Follow the schema.",
           },
         ],
       },
