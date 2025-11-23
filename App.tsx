@@ -16,8 +16,10 @@ const App: React.FC = () => {
   const [currentFile, setCurrentFile] = useState<FileData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [roastCount, setRoastCount] = useState<number>(0);
 
   useEffect(() => {
+    // Theme Initialization
     const savedTheme = localStorage.getItem('theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
@@ -27,6 +29,17 @@ const App: React.FC = () => {
     } else {
       setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
+    }
+
+    // Roast Count Initialization
+    const storedCount = localStorage.getItem('globalRoastCount');
+    if (storedCount) {
+      setRoastCount(parseInt(storedCount, 10));
+    } else {
+      // Start with a realistic "live" number between 14,200 and 14,700
+      const baseCount = 14200 + Math.floor(Math.random() * 500);
+      setRoastCount(baseCount);
+      localStorage.setItem('globalRoastCount', baseCount.toString());
     }
   }, []);
 
@@ -46,6 +59,11 @@ const App: React.FC = () => {
     setState(AppState.ANALYZING);
     setError(null);
     setCurrentFile(file);
+
+    // Increment roast count
+    const newCount = roastCount + 1;
+    setRoastCount(newCount);
+    localStorage.setItem('globalRoastCount', newCount.toString());
     
     try {
       const data = await generateRoast(file.base64, file.mimeType);
@@ -125,6 +143,19 @@ const App: React.FC = () => {
             </div>
 
             <QuoteCarousel />
+
+            {/* Live Counter */}
+            <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-2 delay-200">
+              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 shadow-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                </span>
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 tabular-nums tracking-tight">
+                  <span className="font-bold text-gray-900 dark:text-white">{roastCount.toLocaleString()}</span> resumes roasted
+                </span>
+              </div>
+            </div>
             
             <div className="w-full mt-4">
               <FileUpload onFileSelect={handleFileSelect} />
