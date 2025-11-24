@@ -45,4 +45,5 @@ export interface HistoryItem {
   timestamp: number;
   fileName: string;
   analysis: AnalysisData;
+  resume: FileData; // Store the resume file data
 }

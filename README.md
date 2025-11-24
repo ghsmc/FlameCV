@@ -12,9 +12,29 @@ View your app in AI Studio: https://ai.studio/apps/drive/1Rum_meITlhO6FpM-lZy03X
 
 **Prerequisites:**  Node.js
 
-
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+
+2. Set up environment variables in `.env.local`:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+3. Set up Supabase database:
+   - See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions
+   - Create a Supabase project and run the SQL schema from `supabase/schema.sql`
+
+4. Run the app:
+   ```bash
+   npm run dev
+   ```
+
+## Database Setup
+
+This app uses Supabase to store resumes and their analyses. See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for complete setup instructions.
+
+**Note:** The app will fall back to localStorage if Supabase is not configured, but cloud storage is recommended for full functionality.

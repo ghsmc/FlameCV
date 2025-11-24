@@ -6,6 +6,7 @@ import { QuoteCarousel } from './components/QuoteCarousel';
 import { HistoryList } from './components/HistoryList';
 import { AppState, FileData, AnalysisData, HistoryItem } from './types';
 import { generateRoast, generateImprovement } from './services/gemini';
+import { saveResume, getResumes, clearAllResumes, getResumeCount } from './services/supabase';
 import { Logo } from './components/Logo';
 import { LOADING_MESSAGES, FIXING_MESSAGES } from './constants';
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
@@ -33,23 +34,35 @@ const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
 
-    // Roast Count Initialization - Tracks LOCAL user uploads only
-    const storedCount = localStorage.getItem('userRoastCount');
-    if (storedCount) {
-      setRoastCount(parseInt(storedCount, 10));
-    } else {
-      setRoastCount(0);
-    }
-
-    // Load History
-    const storedHistory = localStorage.getItem('roastHistory');
-    if (storedHistory) {
+    // Load History and Count from Database
+    const loadHistory = async () => {
       try {
-        setHistory(JSON.parse(storedHistory));
+        const resumes = await getResumes();
+        setHistory(resumes);
+        
+        // Get total count from database
+        const count = await getResumeCount();
+        setRoastCount(count);
       } catch (e) {
-        console.error("Failed to parse history", e);
+        console.error("Failed to load history", e);
+        // Fallback to localStorage if database fails
+        const storedCount = localStorage.getItem('userRoastCount');
+        if (storedCount) {
+          setRoastCount(parseInt(storedCount, 10));
+        }
+        const storedHistory = localStorage.getItem('roastHistory');
+        if (storedHistory) {
+          try {
+            const parsed = JSON.parse(storedHistory);
+            setHistory(parsed);
+          } catch (err) {
+            console.error("Failed to parse localStorage history", err);
+          }
+        }
       }
-    }
+    };
+
+    loadHistory();
   }, []);
 
   const toggleTheme = () => {
@@ -64,29 +77,79 @@ const App: React.FC = () => {
     }
   };
 
-  const addToHistory = (file: FileData, data: AnalysisData) => {
-    const newItem: HistoryItem = {
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      fileName: file.name,
-      analysis: data
-    };
-    // Keep last 10 items to avoid quota issues
-    const newHistory = [newItem, ...history].slice(0, 10);
-    setHistory(newHistory);
-    localStorage.setItem('roastHistory', JSON.stringify(newHistory));
+  const addToHistory = async (file: FileData, data: AnalysisData) => {
+    try {
+      const newItem = await saveResume(file, data);
+      if (newItem) {
+        // Add to local state
+        setHistory([newItem, ...history]);
+        // Update count
+        const count = await getResumeCount();
+        setRoastCount(count);
+      } else {
+        // Fallback to localStorage if database save fails
+        const fallbackItem: HistoryItem = {
+          id: Date.now().toString(),
+          timestamp: Date.now(),
+          fileName: file.name,
+          analysis: data,
+          resume: file
+        };
+        const newHistory = [fallbackItem, ...history].slice(0, 10);
+        setHistory(newHistory);
+        localStorage.setItem('roastHistory', JSON.stringify(newHistory));
+        const newCount = roastCount + 1;
+        setRoastCount(newCount);
+        localStorage.setItem('userRoastCount', newCount.toString());
+      }
+    } catch (err) {
+      console.error("Error saving to history:", err);
+      // Fallback to localStorage
+      const fallbackItem: HistoryItem = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        fileName: file.name,
+        analysis: data,
+        resume: file
+      };
+      const newHistory = [fallbackItem, ...history].slice(0, 10);
+      setHistory(newHistory);
+      localStorage.setItem('roastHistory', JSON.stringify(newHistory));
+      const newCount = roastCount + 1;
+      setRoastCount(newCount);
+      localStorage.setItem('userRoastCount', newCount.toString());
+    }
   };
 
-  const clearHistory = () => {
-    setHistory([]);
-    localStorage.removeItem('roastHistory');
+  const clearHistory = async () => {
+    try {
+      const success = await clearAllResumes();
+      if (success) {
+        setHistory([]);
+        setRoastCount(0);
+        localStorage.removeItem('roastHistory');
+        localStorage.removeItem('userRoastCount');
+      } else {
+        // Fallback to localStorage clear
+        setHistory([]);
+        localStorage.removeItem('roastHistory');
+        localStorage.removeItem('userRoastCount');
+        setRoastCount(0);
+      }
+    } catch (err) {
+      console.error("Error clearing history:", err);
+      // Fallback to localStorage clear
+      setHistory([]);
+      localStorage.removeItem('roastHistory');
+      localStorage.removeItem('userRoastCount');
+      setRoastCount(0);
+    }
   };
 
   const handleHistorySelect = (item: HistoryItem) => {
     setRoastData(item.analysis);
-    // We don't have the base64 for history items to save space, so we can't "Fix" them immediately 
-    // without re-uploading, but we can view the result.
-    setCurrentFile({ name: item.fileName, base64: '', mimeType: 'application/pdf' }); 
+    // Now we have the resume data stored, so we can fix it directly
+    setCurrentFile(item.resume);
     setState(AppState.COMPLETE);
   };
 
@@ -95,15 +158,10 @@ const App: React.FC = () => {
     setError(null);
     setCurrentFile(file);
 
-    // Increment roast count
-    const newCount = roastCount + 1;
-    setRoastCount(newCount);
-    localStorage.setItem('userRoastCount', newCount.toString());
-    
     try {
       const data = await generateRoast(file.base64, file.mimeType);
       setRoastData(data);
-      addToHistory(file, data);
+      await addToHistory(file, data);
       setState(AppState.COMPLETE);
     } catch (err: any) {
       console.error(err);
@@ -200,18 +258,18 @@ const App: React.FC = () => {
               <FileUpload onFileSelect={handleFileSelect} />
             </div>
 
-            {/* Recent History */}
-            <HistoryList 
+            {/* Recent History - Hidden but data still stored */}
+            {/* <HistoryList 
               history={history} 
               onSelect={handleHistorySelect} 
               onClear={clearHistory} 
-            />
+            /> */}
             
             <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 w-full border-t border-gray-100 dark:border-white/5 pt-12">
               {[
                 { title: "Brutal Honesty", desc: "We strip away the fluff, buzzwords, and corporate oatmeal." },
                 { title: "Tactical Fixes", desc: "Don't just get burned. Get rewrites you can copy-paste." },
-                { title: "Local History", desc: "Your data is stored locally on your device so you can revisit it." }
+                { title: "Cloud Storage", desc: "Your resumes are stored securely in the cloud so you can access them anywhere." }
               ].map((item, i) => (
                 <div key={i} className="text-left group">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2 tracking-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{item.title}</h3>

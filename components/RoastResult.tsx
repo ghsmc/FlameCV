@@ -21,6 +21,10 @@ export const RoastResult: React.FC<RoastResultProps> = ({
   isFixMode = false 
 }) => {
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'roast' | 'reality'>('roast');
+  
+  // Only show tabs if not in fix mode and career advice exists
+  const showTabs = !isFixMode && data.careerAdvice;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(data.markdownContent);
@@ -85,36 +89,84 @@ export const RoastResult: React.FC<RoastResultProps> = ({
         </div>
       </div>
 
+      {/* Tabs */}
+      {showTabs && (
+        <div className="sticky top-[73px] z-10 mb-8 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+          <div className="flex gap-1">
+            <button
+              onClick={() => setActiveTab('roast')}
+              className={`
+                flex-1 px-4 py-3 text-sm font-medium transition-all
+                ${activeTab === 'roast'
+                  ? 'text-gray-900 dark:text-white border-b-2 border-orange-500 bg-white/50 dark:bg-white/5'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                }
+              `}
+            >
+              Roast
+            </button>
+            <button
+              onClick={() => setActiveTab('reality')}
+              className={`
+                flex-1 px-4 py-3 text-sm font-medium transition-all
+                ${activeTab === 'reality'
+                  ? 'text-gray-900 dark:text-white border-b-2 border-orange-500 bg-white/50 dark:bg-white/5'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
+                }
+              `}
+            >
+              Reality Check
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Content */}
-      <div className={`
-        prose prose-slate dark:prose-invert max-w-none
-        prose-headings:font-semibold prose-headings:tracking-tight prose-h1:text-xl
-        prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:leading-7
-        prose-li:text-gray-600 dark:prose-li:text-gray-300
-        prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white
-        prose-hr:border-gray-200 dark:prose-hr:border-gray-800
-      `}>
-        <ReactMarkdown
-          components={{
-            h1: ({node, ...props}) => 
-              isFixMode 
-                ? <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-gray-200 dark:border-gray-800" {...props} />
-                : <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 dark:text-white mt-12 mb-4 flex items-center gap-2" {...props} />,
-            ul: ({node, ...props}) => <ul className="list-disc pl-4 space-y-2 my-6 marker:text-gray-400 dark:marker:text-gray-600" {...props} />,
-            li: ({node, ...props}) => <li className="pl-1" {...props} />,
-            strong: ({node, ...props}) => <strong className="font-semibold text-gray-900 dark:text-white bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded text-[0.95em]" {...props} />,
-          }}
-        >
-          {data.markdownContent}
-        </ReactMarkdown>
-      </div>
+      {activeTab === 'roast' || !showTabs ? (
+        <div className={`
+          prose prose-slate dark:prose-invert max-w-none
+          prose-headings:font-semibold prose-headings:tracking-tight prose-h1:text-xl
+          prose-p:text-gray-600 dark:prose-p:text-gray-300 prose-p:leading-7 prose-p:mb-4
+          prose-li:text-gray-600 dark:prose-li:text-gray-300
+          prose-strong:font-semibold prose-strong:text-gray-900 dark:prose-strong:text-white
+          prose-hr:border-gray-200 dark:prose-hr:border-gray-800
+        `}>
+          <ReactMarkdown
+            components={{
+              h1: ({node, ...props}) => 
+                isFixMode 
+                  ? <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 pb-4 border-b border-gray-200 dark:border-gray-800" {...props} />
+                  : <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 dark:text-white mt-12 mb-4 first:mt-0" {...props} />,
+              h2: ({node, ...props}) => 
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-10 mb-4 first:mt-0" {...props} />,
+              h3: ({node, ...props}) => 
+                <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 dark:text-white mt-8 mb-4 first:mt-0" {...props} />,
+              p: ({node, ...props}) => 
+                <p className="text-gray-600 dark:text-gray-300 leading-7 mb-4 break-words" {...props} />,
+              ul: ({node, ...props}) => <ul className="list-disc pl-6 space-y-2 my-6 marker:text-gray-400 dark:marker:text-gray-600" {...props} />,
+              ol: ({node, ...props}) => <ol className="list-decimal pl-6 space-y-2 my-6 marker:text-gray-400 dark:marker:text-gray-600" {...props} />,
+              li: ({node, ...props}) => <li className="pl-2 text-gray-600 dark:text-gray-300 leading-7" {...props} />,
+              strong: ({node, ...props}) => <strong className="font-semibold text-gray-900 dark:text-white" {...props} />,
+              em: ({node, ...props}) => <em className="italic text-gray-700 dark:text-gray-200" {...props} />,
+              blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-gray-300 dark:border-gray-700 pl-4 italic my-4 text-gray-600 dark:text-gray-400" {...props} />,
+              code: ({node, inline, ...props}: any) => 
+                inline 
+                  ? <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono text-gray-900 dark:text-gray-100" {...props} />
+                  : <code className="block bg-gray-100 dark:bg-gray-800 p-4 rounded-lg text-sm font-mono text-gray-900 dark:text-gray-100 overflow-x-auto my-4" {...props} />,
+              hr: ({node, ...props}) => <hr className="border-gray-200 dark:border-gray-800 my-8" {...props} />,
+            }}
+          >
+            {data.markdownContent}
+          </ReactMarkdown>
+        </div>
+      ) : (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <TargetCompanies careerAdvice={data.careerAdvice} />
+        </div>
+      )}
       
       {/* Footer Actions */}
       <div className="mt-8 flex flex-col items-center">
-        {/* Show target companies only in roast mode */}
-        {!isFixMode && data.careerAdvice && (
-          <TargetCompanies careerAdvice={data.careerAdvice} />
-        )}
 
         <div className="mt-16 pt-8 border-t border-gray-100 dark:border-gray-800 w-full flex flex-col items-center">
           {isFixMode ? (

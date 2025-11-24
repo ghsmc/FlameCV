@@ -57,7 +57,7 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
   const safety = displayCompanies.filter(c => c.tier === 'Safety');
 
   return (
-    <div className="mt-16 pt-8 border-t border-gray-100 dark:border-gray-800 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+    <div className="w-full">
       
       <div className="flex flex-col gap-10">
         
