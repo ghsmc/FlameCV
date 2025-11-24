@@ -107,7 +107,7 @@ export const RoastResult: React.FC<RoastResultProps> = ({
           parts.forEach((part: string) => {
             if (part.startsWith('**') && part.endsWith('**')) {
               const boldText = part.slice(2, -2);
-              doc.setFont('helvetica', 'bold');
+              doc.setFont('times', 'bold');
               const textWidth = doc.getTextWidth(boldText);
               if (currentX + textWidth > pageWidth - margin) {
                 yPosition += lineHeight;
@@ -118,7 +118,7 @@ export const RoastResult: React.FC<RoastResultProps> = ({
               currentX += textWidth;
             } else if (part.trim()) {
               const cleanPart = stripMarkdown(part);
-              doc.setFont('helvetica', 'normal');
+              doc.setFont('times', 'normal');
               const textWidth = doc.getTextWidth(cleanPart);
               if (currentX + textWidth > pageWidth - margin) {
                 yPosition += lineHeight;
@@ -215,7 +215,7 @@ export const RoastResult: React.FC<RoastResultProps> = ({
             
             // Meta info (location, date) on right
             if (currentJobMeta) {
-              doc.setFont('helvetica', 'normal');
+              doc.setFont('times', 'normal');
               doc.setFontSize(10);
               const metaWidth = doc.getTextWidth(currentJobMeta);
               doc.text(currentJobMeta, pageWidth - margin - metaWidth, yPosition);
