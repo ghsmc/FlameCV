@@ -35,7 +35,7 @@ export const RoastResult: React.FC<RoastResultProps> = ({
 
   const handleDownload = () => {
     if (isFixMode) {
-      // Generate PDF for fixed resume
+      // Generate professionally formatted PDF resume
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -43,67 +43,151 @@ export const RoastResult: React.FC<RoastResultProps> = ({
       const maxWidth = pageWidth - 2 * margin;
       let yPosition = margin;
       
-      // Helper function to add text with word wrap
-      const addText = (text: string, fontSize: number = 11, isBold: boolean = false, color: [number, number, number] = [0, 0, 0]) => {
+      // Helper to check if we need a new page
+      const checkPageBreak = (requiredSpace: number) => {
+        if (yPosition + requiredSpace > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+          return true;
+        }
+        return false;
+      };
+      
+      // Helper to add text with proper formatting
+      const addText = (text: string, fontSize: number = 11, isBold: boolean = false, color: [number, number, number] = [0, 0, 0], x: number = margin) => {
         doc.setFontSize(fontSize);
         doc.setFont('helvetica', isBold ? 'bold' : 'normal');
         doc.setTextColor(color[0], color[1], color[2]);
         
-        const lines = doc.splitTextToSize(text, maxWidth);
-        
-        if (yPosition + (lines.length * fontSize * 0.4) > pageHeight - margin) {
-          doc.addPage();
-          yPosition = margin;
-        }
+        const lines = doc.splitTextToSize(text, maxWidth - (x - margin));
+        checkPageBreak(lines.length * fontSize * 0.5);
         
         lines.forEach((line: string) => {
-          doc.text(line, margin, yPosition);
-          yPosition += fontSize * 0.4;
+          doc.text(line, x, yPosition);
+          yPosition += fontSize * 0.5;
         });
-        
-        yPosition += 5; // Add spacing after text
       };
       
-      // Parse markdown content and format for PDF
+      // Helper to add a horizontal line
+      const addLine = () => {
+        checkPageBreak(5);
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 8;
+      };
+      
+      // Parse markdown content
       const content = data.markdownContent;
       const lines = content.split('\n');
       
-      for (let i = 0; i < lines.length; i++) {
+      // Skip "Rewritten Resume" header if present
+      let startIndex = 0;
+      if (lines[0]?.trim().toLowerCase().includes('rewritten resume')) {
+        startIndex = 1;
+        // Skip empty lines after header
+        while (startIndex < lines.length && !lines[startIndex]?.trim()) {
+          startIndex++;
+        }
+      }
+      
+      for (let i = startIndex; i < lines.length; i++) {
         const line = lines[i].trim();
         
+        // Skip empty lines (but add small spacing)
         if (!line) {
-          yPosition += 5;
+          yPosition += 3;
           continue;
         }
         
-        // Handle headings
-        if (line.startsWith('# ')) {
-          if (yPosition > margin) yPosition += 10;
-          addText(line.substring(2), 18, true, [0, 0, 0]);
-        } else if (line.startsWith('## ')) {
-          if (yPosition > margin) yPosition += 8;
-          addText(line.substring(3), 16, true, [0, 0, 0]);
-        } else if (line.startsWith('### ')) {
-          if (yPosition > margin) yPosition += 6;
-          addText(line.substring(4), 14, true, [0, 0, 0]);
-        } else if (line.startsWith('- ') || line.startsWith('* ')) {
-          // Handle bullet points
-          const bulletText = line.substring(2);
-          doc.setFontSize(11);
-          doc.text('•', margin, yPosition);
-          const bulletLines = doc.splitTextToSize(bulletText, maxWidth - 10);
+        // Skip "What Changed and Why" section if present
+        if (line.toLowerCase().includes('what changed') || line.toLowerCase().includes('what changed and why')) {
+          break;
+        }
+        
+        // Handle main title (usually name) - H1
+        if (line.startsWith('# ') && i === startIndex) {
+          const name = line.substring(2).trim();
+          checkPageBreak(15);
+          addText(name, 24, true, [0, 0, 0]);
+          yPosition += 5;
+        }
+        // Handle section headers - H2
+        else if (line.startsWith('## ')) {
+          const sectionTitle = line.substring(3).trim();
+          checkPageBreak(12);
+          yPosition += 8;
+          addText(sectionTitle.toUpperCase(), 14, true, [0, 0, 0]);
+          // Add underline
+          doc.setDrawColor(100, 100, 100);
+          doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
+          yPosition += 6;
+        }
+        // Handle subsection headers - H3
+        else if (line.startsWith('### ')) {
+          const subsectionTitle = line.substring(4).trim();
+          checkPageBreak(10);
+          yPosition += 5;
+          addText(subsectionTitle, 12, true, [0, 0, 0]);
+          yPosition += 2;
+        }
+        // Handle bullet points
+        else if (line.startsWith('- ') || line.startsWith('* ')) {
+          const bulletText = line.substring(2).trim();
+          checkPageBreak(8);
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          const bulletLines = doc.splitTextToSize(bulletText, maxWidth - 15);
+          
           bulletLines.forEach((bulletLine: string, idx: number) => {
-            if (yPosition > pageHeight - margin) {
-              doc.addPage();
-              yPosition = margin;
+            checkPageBreak(6);
+            if (idx === 0) {
+              doc.text('•', margin + 2, yPosition);
+              doc.text(bulletLine, margin + 8, yPosition);
+            } else {
+              doc.text(bulletLine, margin + 8, yPosition);
             }
-            doc.text(bulletLine, margin + 8, yPosition);
-            if (idx < bulletLines.length - 1) yPosition += 11 * 0.4;
+            yPosition += 5;
           });
-          yPosition += 11 * 0.4 + 3;
-        } else {
-          // Regular text
-          addText(line, 11, false, [0, 0, 0]);
+          yPosition += 2;
+        }
+        // Handle bold text (wrapped in **) - strip markdown and format
+        else if (line.includes('**')) {
+          // Remove markdown bold syntax
+          let cleanLine = line.replace(/\*\*(.*?)\*\*/g, '$1');
+          // Remove any other markdown syntax
+          cleanLine = cleanLine.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1'); // Links
+          cleanLine = cleanLine.replace(/`([^`]+)`/g, '$1'); // Code
+          addText(cleanLine, 10, false, [0, 0, 0]);
+          yPosition += 2;
+        }
+        // Remove any remaining markdown syntax from regular text
+        else {
+          let cleanLine = line
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Links
+            .replace(/`([^`]+)`/g, '$1') // Code
+            .replace(/\*\*(.*?)\*\*/g, '$1') // Bold
+            .replace(/\*(.*?)\*/g, '$1') // Italic
+            .replace(/^#{1,6}\s+/, '') // Headers
+            .replace(/^[-*+]\s+/, '') // Bullets
+            .replace(/^\d+\.\s+/, ''); // Numbered lists
+          
+          // Check if it looks like a date range or location (common resume format)
+          const isDateRange = /^\d{4}|\w+\s+\d{4}|Present|Current/i.test(cleanLine);
+          const isLocation = /^[A-Z][a-z]+,\s*[A-Z]{2}|^[A-Z][a-z]+\s+[A-Z][a-z]+/i.test(cleanLine);
+          
+          if (isDateRange || isLocation) {
+            // Right-align dates and locations
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            const textWidth = doc.getTextWidth(cleanLine);
+            checkPageBreak(6);
+            doc.text(cleanLine, pageWidth - margin - textWidth, yPosition);
+            yPosition += 5;
+          } else if (cleanLine.trim()) {
+            // Regular paragraph text
+            addText(cleanLine, 10, false, [0, 0, 0]);
+            yPosition += 2;
+          }
         }
       }
       
