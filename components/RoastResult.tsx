@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ArrowPathIcon, SparklesIcon, ClipboardDocumentIcon, ClipboardDocumentCheckIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { jsPDF } from 'jspdf';
 import { AnalysisData } from '../types';
 import { ScoreRing } from './ScoreRing';
 import { TargetCompanies } from './TargetCompanies';
@@ -33,15 +34,93 @@ export const RoastResult: React.FC<RoastResultProps> = ({
   };
 
   const handleDownload = () => {
-    const blob = new Blob([data.markdownContent], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = isFixMode ? 'resume-fixed.md' : 'resume-roast.md';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (isFixMode) {
+      // Generate PDF for fixed resume
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - 2 * margin;
+      let yPosition = margin;
+      
+      // Helper function to add text with word wrap
+      const addText = (text: string, fontSize: number = 11, isBold: boolean = false, color: [number, number, number] = [0, 0, 0]) => {
+        doc.setFontSize(fontSize);
+        doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+        doc.setTextColor(color[0], color[1], color[2]);
+        
+        const lines = doc.splitTextToSize(text, maxWidth);
+        
+        if (yPosition + (lines.length * fontSize * 0.4) > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        
+        lines.forEach((line: string) => {
+          doc.text(line, margin, yPosition);
+          yPosition += fontSize * 0.4;
+        });
+        
+        yPosition += 5; // Add spacing after text
+      };
+      
+      // Parse markdown content and format for PDF
+      const content = data.markdownContent;
+      const lines = content.split('\n');
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        if (!line) {
+          yPosition += 5;
+          continue;
+        }
+        
+        // Handle headings
+        if (line.startsWith('# ')) {
+          if (yPosition > margin) yPosition += 10;
+          addText(line.substring(2), 18, true, [0, 0, 0]);
+        } else if (line.startsWith('## ')) {
+          if (yPosition > margin) yPosition += 8;
+          addText(line.substring(3), 16, true, [0, 0, 0]);
+        } else if (line.startsWith('### ')) {
+          if (yPosition > margin) yPosition += 6;
+          addText(line.substring(4), 14, true, [0, 0, 0]);
+        } else if (line.startsWith('- ') || line.startsWith('* ')) {
+          // Handle bullet points
+          const bulletText = line.substring(2);
+          doc.setFontSize(11);
+          doc.text('•', margin, yPosition);
+          const bulletLines = doc.splitTextToSize(bulletText, maxWidth - 10);
+          bulletLines.forEach((bulletLine: string, idx: number) => {
+            if (yPosition > pageHeight - margin) {
+              doc.addPage();
+              yPosition = margin;
+            }
+            doc.text(bulletLine, margin + 8, yPosition);
+            if (idx < bulletLines.length - 1) yPosition += 11 * 0.4;
+          });
+          yPosition += 11 * 0.4 + 3;
+        } else {
+          // Regular text
+          addText(line, 11, false, [0, 0, 0]);
+        }
+      }
+      
+      // Save PDF
+      doc.save('resume-fixed.pdf');
+    } else {
+      // Download markdown for roast
+      const blob = new Blob([data.markdownContent], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resume-roast.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
@@ -68,7 +147,7 @@ export const RoastResult: React.FC<RoastResultProps> = ({
                  className="hidden sm:flex items-center justify-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors px-3 py-1.5 rounded-md"
                >
                  <ArrowDownTrayIcon className="w-3.5 h-3.5" />
-                 Save
+                 {isFixMode ? 'Save PDF' : 'Save'}
                </button>
                <button
                  onClick={handleCopy}
@@ -177,7 +256,7 @@ export const RoastResult: React.FC<RoastResultProps> = ({
                 className="w-full flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-lg text-white bg-gray-900 dark:bg-white dark:text-black hover:bg-black dark:hover:bg-gray-100 transition-all shadow-sm active:scale-[0.98]"
               >
                 <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
-                Download .md File
+                Download PDF
               </button>
              </div>
           ) : (
