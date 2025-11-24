@@ -22,11 +22,10 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   useEffect(() => {
-    // Theme Initialization
+    // Theme Initialization - Light mode is default
     const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+    if (savedTheme === 'dark') {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     } else {
