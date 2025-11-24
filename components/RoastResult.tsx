@@ -53,27 +53,93 @@ export const RoastResult: React.FC<RoastResultProps> = ({
         return false;
       };
       
-      // Helper to add text with proper formatting
-      const addText = (text: string, fontSize: number = 11, isBold: boolean = false, color: [number, number, number] = [0, 0, 0], x: number = margin) => {
-        doc.setFontSize(fontSize);
-        doc.setFont('helvetica', isBold ? 'bold' : 'normal');
-        doc.setTextColor(color[0], color[1], color[2]);
-        
-        const lines = doc.splitTextToSize(text, maxWidth - (x - margin));
-        checkPageBreak(lines.length * fontSize * 0.5);
-        
-        lines.forEach((line: string) => {
-          doc.text(line, x, yPosition);
-          yPosition += fontSize * 0.5;
-        });
+      // Helper to strip all markdown syntax
+      const stripMarkdown = (text: string): string => {
+        return text
+          .replace(/\*\*(.*?)\*\*/g, '$1') // Bold
+          .replace(/\*(.*?)\*/g, '$1') // Italic
+          .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Links
+          .replace(/`([^`]+)`/g, '$1') // Code
+          .replace(/^#{1,6}\s+/, '') // Headers
+          .replace(/^[-*+]\s+/, '') // Bullets
+          .replace(/^\d+\.\s+/, '') // Numbered lists
+          .trim();
       };
       
-      // Helper to add a horizontal line
-      const addLine = () => {
-        checkPageBreak(5);
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 8;
+      // Helper to add text with mixed formatting (handles bold within text)
+      const addFormattedText = (text: string, fontSize: number = 10, x: number = margin, lineHeight: number = 5) => {
+        doc.setFontSize(fontSize);
+        const lineStartX = x;
+        
+        // First, strip all markdown and get clean text
+        let cleanText = stripMarkdown(text);
+        
+        // Check if original had bold markers - if so, preserve bold structure
+        const hasBold = text.includes('**');
+        if (hasBold) {
+          // Extract bold parts and their positions
+          const boldMatches: Array<{text: string, start: number, end: number}> = [];
+          let searchText = text;
+          let offset = 0;
+          
+          while (searchText.includes('**')) {
+            const startIdx = searchText.indexOf('**');
+            const endIdx = searchText.indexOf('**', startIdx + 2);
+            if (endIdx === -1) break;
+            
+            const boldText = searchText.substring(startIdx + 2, endIdx);
+            boldMatches.push({
+              text: boldText,
+              start: offset + startIdx,
+              end: offset + endIdx + 2
+            });
+            
+            searchText = searchText.substring(endIdx + 2);
+            offset += endIdx + 2;
+          }
+          
+          // Render with bold formatting
+          let currentX = x;
+          let processedText = cleanText;
+          
+          // Simple approach: render bold parts separately
+          const parts = text.split(/(\*\*[^*]+\*\*)/g);
+          parts.forEach((part: string) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              const boldText = part.slice(2, -2);
+              doc.setFont('helvetica', 'bold');
+              const textWidth = doc.getTextWidth(boldText);
+              if (currentX + textWidth > pageWidth - margin) {
+                yPosition += lineHeight;
+                currentX = x;
+                checkPageBreak(lineHeight);
+              }
+              doc.text(boldText, currentX, yPosition);
+              currentX += textWidth;
+            } else if (part.trim()) {
+              const cleanPart = stripMarkdown(part);
+              doc.setFont('helvetica', 'normal');
+              const textWidth = doc.getTextWidth(cleanPart);
+              if (currentX + textWidth > pageWidth - margin) {
+                yPosition += lineHeight;
+                currentX = x;
+                checkPageBreak(lineHeight);
+              }
+              doc.text(cleanPart, currentX, yPosition);
+              currentX += textWidth;
+            }
+          });
+          yPosition += lineHeight;
+        } else {
+          // No bold, just render normally
+          const wrappedLines = doc.splitTextToSize(cleanText, maxWidth - (x - margin));
+          wrappedLines.forEach((wrappedLine: string) => {
+            checkPageBreak(lineHeight);
+            doc.setFont('helvetica', 'normal');
+            doc.text(wrappedLine, x, yPosition);
+            yPosition += lineHeight;
+          });
+        }
       };
       
       // Parse markdown content
@@ -84,109 +150,146 @@ export const RoastResult: React.FC<RoastResultProps> = ({
       let startIndex = 0;
       if (lines[0]?.trim().toLowerCase().includes('rewritten resume')) {
         startIndex = 1;
-        // Skip empty lines after header
         while (startIndex < lines.length && !lines[startIndex]?.trim()) {
           startIndex++;
         }
       }
       
+      let inSection = false;
+      let currentJobTitle = '';
+      let currentJobMeta = '';
+      
       for (let i = startIndex; i < lines.length; i++) {
         const line = lines[i].trim();
         
-        // Skip empty lines (but add small spacing)
+        // Skip empty lines
         if (!line) {
-          yPosition += 3;
+          if (inSection) yPosition += 3;
           continue;
         }
         
-        // Skip "What Changed and Why" section if present
-        if (line.toLowerCase().includes('what changed') || line.toLowerCase().includes('what changed and why')) {
+        // Skip "What Changed and Why" section
+        if (line.toLowerCase().includes('what changed')) {
           break;
         }
         
-        // Handle main title (usually name) - H1
+        // Handle main title (name) - H1
         if (line.startsWith('# ') && i === startIndex) {
-          const name = line.substring(2).trim();
-          checkPageBreak(15);
-          addText(name, 24, true, [0, 0, 0]);
-          yPosition += 5;
+          const name = stripMarkdown(line.substring(2));
+          checkPageBreak(12);
+          doc.setFontSize(18);
+          doc.setFont('helvetica', 'bold');
+          doc.text(name, margin, yPosition);
+          yPosition += 8;
         }
         // Handle section headers - H2
         else if (line.startsWith('## ')) {
-          const sectionTitle = line.substring(3).trim();
-          checkPageBreak(12);
-          yPosition += 8;
-          addText(sectionTitle.toUpperCase(), 14, true, [0, 0, 0]);
-          // Add underline
-          doc.setDrawColor(100, 100, 100);
-          doc.line(margin, yPosition - 2, pageWidth - margin, yPosition - 2);
-          yPosition += 6;
-        }
-        // Handle subsection headers - H3
-        else if (line.startsWith('### ')) {
-          const subsectionTitle = line.substring(4).trim();
+          const sectionTitle = stripMarkdown(line.substring(3)).toUpperCase();
           checkPageBreak(10);
+          yPosition += 6;
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text(sectionTitle, margin, yPosition);
+          // Add subtle underline
+          doc.setDrawColor(180, 180, 180);
+          doc.line(margin, yPosition + 1, pageWidth - margin, yPosition + 1);
           yPosition += 5;
-          addText(subsectionTitle, 12, true, [0, 0, 0]);
-          yPosition += 2;
+          inSection = true;
+        }
+        // Handle subsection/company/job headers - H3
+        else if (line.startsWith('### ')) {
+          const subsectionTitle = stripMarkdown(line.substring(4));
+          checkPageBreak(8);
+          yPosition += 4;
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          
+          // Check if it's a job entry (has | separator for location/date)
+          if (subsectionTitle.includes('|')) {
+            const parts = subsectionTitle.split('|').map(p => p.trim());
+            currentJobTitle = parts[0];
+            currentJobMeta = parts.slice(1).join(' | ');
+            
+            // Job title on left
+            doc.text(currentJobTitle, margin, yPosition);
+            
+            // Meta info (location, date) on right
+            if (currentJobMeta) {
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(10);
+              const metaWidth = doc.getTextWidth(currentJobMeta);
+              doc.text(currentJobMeta, pageWidth - margin - metaWidth, yPosition);
+            }
+          } else {
+            doc.text(subsectionTitle, margin, yPosition);
+          }
+          yPosition += 4;
         }
         // Handle bullet points
         else if (line.startsWith('- ') || line.startsWith('* ')) {
-          const bulletText = line.substring(2).trim();
-          checkPageBreak(8);
+          const bulletText = stripMarkdown(line.substring(2));
+          checkPageBreak(6);
           doc.setFontSize(10);
           doc.setFont('helvetica', 'normal');
-          const bulletLines = doc.splitTextToSize(bulletText, maxWidth - 15);
           
-          bulletLines.forEach((bulletLine: string, idx: number) => {
-            checkPageBreak(6);
-            if (idx === 0) {
-              doc.text('•', margin + 2, yPosition);
-              doc.text(bulletLine, margin + 8, yPosition);
-            } else {
-              doc.text(bulletLine, margin + 8, yPosition);
-            }
-            yPosition += 5;
-          });
-          yPosition += 2;
+          // Check for bold text in bullet
+          if (bulletText.includes('**')) {
+            addFormattedText(line.substring(2), 10, margin + 6, 5);
+          } else {
+            const bulletLines = doc.splitTextToSize(bulletText, maxWidth - 15);
+            bulletLines.forEach((bulletLine: string, idx: number) => {
+              checkPageBreak(5);
+              if (idx === 0) {
+                doc.text('•', margin + 2, yPosition);
+                doc.text(bulletLine, margin + 8, yPosition);
+              } else {
+                doc.text(bulletLine, margin + 8, yPosition);
+              }
+              yPosition += 5;
+            });
+          }
+          yPosition += 1;
         }
-        // Handle bold text (wrapped in **) - strip markdown and format
-        else if (line.includes('**')) {
-          // Remove markdown bold syntax
-          let cleanLine = line.replace(/\*\*(.*?)\*\*/g, '$1');
-          // Remove any other markdown syntax
-          cleanLine = cleanLine.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1'); // Links
-          cleanLine = cleanLine.replace(/`([^`]+)`/g, '$1'); // Code
-          addText(cleanLine, 10, false, [0, 0, 0]);
-          yPosition += 2;
-        }
-        // Remove any remaining markdown syntax from regular text
+        // Handle regular text (contact info, descriptions, etc.)
         else {
-          let cleanLine = line
-            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Links
-            .replace(/`([^`]+)`/g, '$1') // Code
-            .replace(/\*\*(.*?)\*\*/g, '$1') // Bold
-            .replace(/\*(.*?)\*/g, '$1') // Italic
-            .replace(/^#{1,6}\s+/, '') // Headers
-            .replace(/^[-*+]\s+/, '') // Bullets
-            .replace(/^\d+\.\s+/, ''); // Numbered lists
+          const cleanLine = stripMarkdown(line);
           
-          // Check if it looks like a date range or location (common resume format)
-          const isDateRange = /^\d{4}|\w+\s+\d{4}|Present|Current/i.test(cleanLine);
-          const isLocation = /^[A-Z][a-z]+,\s*[A-Z]{2}|^[A-Z][a-z]+\s+[A-Z][a-z]+/i.test(cleanLine);
+          // Check if it looks like contact info (has @, phone, or common separators)
+          const hasContactInfo = /@|\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}|linkedin|github|\.com/i.test(cleanLine);
+          const isDateRange = /^\d{4}|Present|Current|^\w+\s+\d{4}/i.test(cleanLine);
+          const isLocation = /^[A-Z][a-z]+,\s*[A-Z]{2}/.test(cleanLine);
           
-          if (isDateRange || isLocation) {
-            // Right-align dates and locations
+          if (hasContactInfo || (isDateRange && !isLocation)) {
+            // Contact info or date - smaller font, might be on same line as name
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            checkPageBreak(5);
+            addFormattedText(line, 9, margin, 4);
+            yPosition += 2;
+          } else if (isLocation) {
+            // Location - right align if it's standalone
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             const textWidth = doc.getTextWidth(cleanLine);
-            checkPageBreak(6);
+            checkPageBreak(5);
             doc.text(cleanLine, pageWidth - margin - textWidth, yPosition);
             yPosition += 5;
+          } else if (cleanLine.includes('**')) {
+            // Has bold formatting
+            checkPageBreak(6);
+            addFormattedText(line, 10, margin, 5);
           } else if (cleanLine.trim()) {
-            // Regular paragraph text
-            addText(cleanLine, 10, false, [0, 0, 0]);
-            yPosition += 2;
+            // Regular paragraph
+            checkPageBreak(6);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            const wrappedLines = doc.splitTextToSize(cleanLine, maxWidth);
+            wrappedLines.forEach((wrappedLine: string) => {
+              checkPageBreak(5);
+              doc.text(wrappedLine, margin, yPosition);
+              yPosition += 5;
+            });
+            yPosition += 1;
           }
         }
       }
