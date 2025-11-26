@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { LoadingScreen } from './components/LoadingScreen';
 import { RoastResult } from './components/RoastResult';
-import { QuoteCarousel } from './components/QuoteCarousel';
+import { LogoTicker } from './components/LogoTicker';
 import { HistoryList } from './components/HistoryList';
-import { AppState, FileData, AnalysisData, HistoryItem } from './types';
+import { Survey } from './components/Survey';
+import { AppState, FileData, AnalysisData, HistoryItem, UserPreferences } from './types';
 import { generateRoast, generateImprovement } from './services/gemini';
 import { saveResume, getResumes, clearAllResumes, getResumeCount } from './services/supabase';
 import { Logo } from './components/Logo';
@@ -16,6 +17,7 @@ const App: React.FC = () => {
   const [roastData, setRoastData] = useState<AnalysisData | null>(null);
   const [fixedData, setFixedData] = useState<AnalysisData | null>(null);
   const [currentFile, setCurrentFile] = useState<FileData | null>(null);
+  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [roastCount, setRoastCount] = useState<number>(0);
@@ -153,12 +155,27 @@ const App: React.FC = () => {
   };
 
   const handleFileSelect = async (file: FileData) => {
+    setCurrentFile(file);
+    setError(null);
+    setState(AppState.SURVEY);
+  };
+
+  const handleSurveyComplete = async (prefs: UserPreferences) => {
+    setPreferences(prefs);
+    await startAnalysis(currentFile!, prefs);
+  };
+
+  const handleSkipSurvey = async () => {
+    setPreferences(null);
+    await startAnalysis(currentFile!, null);
+  };
+
+  const startAnalysis = async (file: FileData, prefs: UserPreferences | null) => {
     setState(AppState.ANALYZING);
     setError(null);
-    setCurrentFile(file);
 
     try {
-      const data = await generateRoast(file.base64, file.mimeType);
+      const data = await generateRoast(file.base64, file.mimeType, prefs);
       setRoastData(data);
       await addToHistory(file, data);
       setState(AppState.COMPLETE);
@@ -198,6 +215,7 @@ const App: React.FC = () => {
     setRoastData(null);
     setFixedData(null);
     setCurrentFile(null);
+    setPreferences(null);
     setError(null);
   };
 
@@ -206,11 +224,11 @@ const App: React.FC = () => {
       
       {/* Header */}
       <header className="fixed w-full top-0 z-50 border-b border-gray-100/80 dark:border-white/5 bg-white/70 dark:bg-[#020617]/70 backdrop-blur-xl">
-        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5 cursor-pointer group" onClick={handleReset}>
             <Logo className="w-7 h-7 group-hover:scale-105 transition-transform duration-200" />
             <h1 className="text-base font-semibold tracking-tighter text-gray-900 dark:text-white">
-              FlameCV
+              Matchpoint
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -225,20 +243,19 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Layout */}
-      <main className="max-w-4xl mx-auto px-6 pt-36 pb-20">
+      <main className="max-w-6xl mx-auto px-6 pt-36 pb-20">
         
         {state === AppState.IDLE && (
           <div className="flex flex-col items-center text-center animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
             <div className="max-w-3xl mb-10 space-y-5">
               <h2 className="text-5xl sm:text-6xl font-bold text-gray-900 dark:text-white tracking-tighter text-balance leading-[1.1]">
-                Your resume, <br className="hidden sm:block"/>
-                <span className="bg-gradient-to-r from-orange-600 to-red-600 dark:from-orange-400 dark:to-red-500 bg-clip-text text-transparent">roasted</span>{' '}
-                and{' '}
-                <span className="bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-300 dark:to-blue-500 bg-clip-text text-transparent">refined</span>.
+                Get matched to <br className="hidden sm:block"/>
+                <span className="bg-gradient-to-r from-orange-600 to-red-600 dark:from-orange-400 dark:to-red-500 bg-clip-text text-transparent">startups</span>{' '}
+                instantly.
               </h2>
             </div>
 
-            <QuoteCarousel />
+            <LogoTicker />
 
             {/* Live Counter */}
             <div className="flex justify-center mb-8 animate-in fade-in slide-in-from-bottom-2 delay-200">
@@ -248,7 +265,7 @@ const App: React.FC = () => {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                 </span>
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-300 tabular-nums tracking-tight">
-                  <span className="font-bold text-gray-900 dark:text-white">{roastCount.toLocaleString()}</span> resumes roasted
+                  <span className="font-bold text-gray-900 dark:text-white">{roastCount.toLocaleString()}</span> matches found
                 </span>
               </div>
             </div>
@@ -266,9 +283,9 @@ const App: React.FC = () => {
             
             <div className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-8 w-full border-t border-gray-100 dark:border-white/5 pt-12">
               {[
-                { title: "Brutal Honesty", desc: "We strip away the fluff, buzzwords, and corporate oatmeal." },
-                { title: "Tactical Fixes", desc: "Don't just get burned. Get rewrites you can copy-paste." },
-                { title: "Cloud Storage", desc: "Your resumes are stored securely in the cloud so you can access them anywhere." }
+                { title: "Instant Matching", desc: "Our AI scans thousands of high-growth startups to find your perfect fit." },
+                { title: "Founder-Led Teams", desc: "Prioritize roles where you work directly with founders and core teams." },
+                { title: "Career Acceleration", desc: "Join companies at the inflection point. Optimize for learning and equity." }
               ].map((item, i) => (
                 <div key={i} className="text-left group">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2 tracking-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{item.title}</h3>
@@ -277,6 +294,10 @@ const App: React.FC = () => {
               ))}
             </div>
           </div>
+        )}
+
+        {state === AppState.SURVEY && (
+          <Survey onComplete={handleSurveyComplete} onSkip={handleSkipSurvey} />
         )}
 
         {(state === AppState.ANALYZING || state === AppState.FIXING) && (
@@ -325,11 +346,11 @@ const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="max-w-4xl mx-auto px-6 py-12 border-t border-gray-100 dark:border-white/5">
+      <footer className="max-w-6xl mx-auto px-6 py-12 border-t border-gray-100 dark:border-white/5">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <Logo className="w-5 h-5 opacity-80 grayscale hover:grayscale-0 transition-all" />
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-500 tracking-tight">FlameCV</span>
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-500 tracking-tight">Matchpoint</span>
           </div>
           <p className="text-sm text-gray-400 dark:text-gray-600">
              &copy; {new Date().getFullYear()}

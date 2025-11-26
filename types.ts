@@ -1,5 +1,6 @@
 export enum AppState {
   IDLE = 'IDLE',
+  SURVEY = 'SURVEY',
   ANALYZING = 'ANALYZING',
   COMPLETE = 'COMPLETE',
   FIXING = 'FIXING',
@@ -7,11 +8,23 @@ export enum AppState {
   ERROR = 'ERROR',
 }
 
+export interface UserPreferences {
+  targetRole: string;
+  targetLocations: string[];
+  startupStage: string[];
+  preferredDomains: string[];
+  yearsOfExperience: string;
+  salaryExpectation: string;
+}
+
 export interface CompanyMatch {
   name: string;
   domain: string;
   tier: 'Reach' | 'Target' | 'Safety';
   reason: string;
+  description?: string;
+  location?: string;
+  funding?: string;
 }
 
 export interface CareerAdvice {
