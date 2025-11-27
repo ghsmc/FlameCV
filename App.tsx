@@ -12,7 +12,7 @@ import { Logo } from './components/Logo';
 import { SunIcon, MoonIcon, BoltIcon, UserGroupIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
 
 // Smooth easing curve for professional feel
-const smoothEase = [0.22, 1, 0.36, 1];
+const smoothEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>(AppState.IDLE);
@@ -27,22 +27,26 @@ const App: React.FC = () => {
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
-    // Delay content reveal for smooth entrance
-    const timer = setTimeout(() => setShowContent(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
+    // Initialize theme immediately to avoid flash
     const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    if (savedTheme === 'dark') {
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     } else {
       setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
     }
+  }, []);
 
+  useEffect(() => {
+    // Delay content reveal for smooth entrance after portal animation
+    const timer = setTimeout(() => setShowContent(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     const loadHistory = async () => {
       try {
         const resumes = await getResumes();
@@ -167,300 +171,452 @@ const App: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#020617] text-gray-900 dark:text-gray-100 font-sans selection:bg-orange-100 selection:text-orange-900 dark:selection:bg-orange-900/30 dark:selection:text-orange-100 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#020617] text-gray-900 dark:text-gray-100 font-sans selection:bg-orange-100 selection:text-orange-900 dark:selection:bg-orange-900/30 dark:selection:text-orange-100 transition-colors duration-300">
       
-      {/* Header - appears first */}
-      <motion.header 
-        initial={{ opacity: 0, y: -20 }}
-        animate={showContent ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
-        transition={{ duration: 0.6, ease: smoothEase }}
-        className="fixed w-full top-0 z-50 border-b border-gray-100/80 dark:border-white/5 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl"
-      >
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div 
-            className="flex items-center gap-2.5 cursor-pointer" 
-            onClick={handleReset}
-          >
-            <Logo className="w-7 h-7" />
-            <h1 className="text-base font-semibold tracking-tight text-gray-900 dark:text-white">
-              Matchpoint
-            </h1>
-          </div>
-          <button 
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors duration-200"
-          >
-            {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
-          </button>
-        </div>
-      </motion.header>
+      {/* Portal Transition Overlay */}
+      <motion.div className="fixed inset-0 z-[100] flex flex-col pointer-events-none">
+        <motion.div 
+          initial={{ y: 0 }}
+          animate={{ y: "-100%" }}
+          transition={{ duration: 1.5, ease: [0.76, 0, 0.24, 1], delay: 0.2 }}
+          className="h-[50vh] w-full bg-white dark:bg-[#020617] origin-top"
+        />
+        <motion.div 
+          initial={{ y: 0 }}
+          animate={{ y: "100%" }}
+          transition={{ duration: 1.5, ease: [0.76, 0, 0.24, 1], delay: 0.2 }}
+          className="h-[50vh] w-full bg-white dark:bg-[#020617] origin-bottom"
+        />
+      </motion.div>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 pt-32 pb-20">
-        <AnimatePresence mode="wait">
-          
-          {/* Landing Page */}
-          {state === AppState.IDLE && showContent && (
-            <motion.div
-              key="landing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: smoothEase }}
+      {/* Full Width Landscape Background (Idle State Only) */}
+      <AnimatePresence>
+        {state === AppState.IDLE && showContent && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: smoothEase }}
+            className="fixed top-0 left-0 right-0 h-full overflow-hidden z-0 pointer-events-none"
+            aria-hidden="true"
+          >
+            {/* Sky gradient */}
+            <div className="absolute inset-0 bg-gradient-to-b from-orange-100/80 via-white to-white dark:from-orange-950/40 dark:via-[#020617] dark:to-[#020617]" />
+            
+            {/* Sun */}
+            <div 
+              className="absolute top-[15%] right-[15%] w-24 h-24 sm:w-32 sm:h-32 rounded-full blur-3xl opacity-80 dark:opacity-40"
+              style={{
+                background: 'radial-gradient(circle, #fb923c 0%, #ea580c 100%)',
+              }}
+            />
+            <div 
+              className="absolute top-[18%] right-[18%] w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-orange-500 blur-lg opacity-90 dark:bg-orange-500/50"
+            />
+
+            {/* Back mountain layer */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-[45%] opacity-80 dark:opacity-30"
+              style={{
+                background: 'linear-gradient(180deg, #fdba74 0%, #f97316 100%)', // Light orange
+                clipPath: 'polygon(0% 100%, 0% 40%, 15% 20%, 30% 35%, 45% 15%, 60% 30%, 75% 10%, 90% 25%, 100% 20%, 100% 100%)',
+              }}
+            />
+            
+            {/* Middle mountain layer */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-[35%] opacity-90 dark:opacity-40"
+              style={{
+                background: 'linear-gradient(180deg, #fb923c 0%, #ea580c 100%)', // Medium orange
+                clipPath: 'polygon(0% 100%, 0% 60%, 20% 35%, 35% 55%, 50% 30%, 65% 45%, 80% 25%, 100% 40%, 100% 100%)',
+              }}
+            />
+            
+            {/* Front hill layer */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-[25%] opacity-100 dark:opacity-50"
+              style={{
+                background: 'linear-gradient(180deg, #f97316 0%, #dc2626 100%)', // Deep orange-red
+                clipPath: 'polygon(0% 100%, 0% 75%, 25% 55%, 50% 70%, 75% 50%, 100% 65%, 100% 100%)',
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Layout Container */}
+      <div className="relative z-10 max-w-[1400px] mx-auto p-4 md:p-8 min-h-screen flex flex-col">
+        
+        {/* Header - Boxed Style */}
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={showContent ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
+          transition={{ duration: 0.6, ease: smoothEase }}
+          className="w-full border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl mb-8"
+        >
+          <div className="h-16 px-6 flex items-center justify-between">
+            <div 
+              className="flex items-center gap-2.5 cursor-pointer" 
+              onClick={handleReset}
             >
-              {/* 
-                HERO SECTION 
-                Narrow content width (640px) for optimal reading
-                Centered alignment, generous vertical rhythm
-              */}
-              <section className="relative flex flex-col items-center text-center pt-8 pb-24 overflow-hidden">
-                {/* CSS Landscape Effect */}
-                <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-                  {/* Sky gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-orange-50 via-white to-white dark:from-orange-950/20 dark:via-[#020617] dark:to-[#020617]" />
+              <Logo className="w-8 h-8" />
+              <h1 className="text-base font-semibold tracking-tight text-gray-900 dark:text-white hidden sm:block">
+                Matchpoint
+              </h1>
+            </div>
+            
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Candidates</a>
+              <a href="#" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Startups</a>
+              <a href="#" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Pricing</a>
+              <a href="#" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Docs</a>
+            </nav>
+
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={toggleTheme}
+                className="p-2 rounded-none text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors border-r border-gray-200 dark:border-white/10 pr-4"
+              >
+                {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+              </button>
+              <button className="hidden sm:block text-sm font-medium text-gray-900 dark:text-white hover:opacity-70">
+                Login
+              </button>
+            </div>
+          </div>
+        </motion.header>
+
+        {/* Main Content Area */}
+        <main className="flex-grow flex flex-col">
+          <AnimatePresence mode="wait">
+            
+            {/* Landing Page - Split Layout */}
+            {state === AppState.IDLE && showContent && (
+              <motion.div
+                key="landing"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: smoothEase }}
+                className="flex-grow flex flex-col"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-8">
                   
-                  {/* Back mountain layer */}
-                  <div 
-                    className="absolute bottom-0 left-0 right-0 h-[40%] opacity-[0.07] dark:opacity-[0.15]"
-                    style={{
-                      background: 'linear-gradient(135deg, #f97316 0%, #dc2626 100%)',
-                      clipPath: 'polygon(0% 100%, 0% 60%, 15% 45%, 30% 55%, 45% 35%, 60% 50%, 75% 30%, 90% 45%, 100% 40%, 100% 100%)',
-                    }}
-                  />
-                  
-                  {/* Middle mountain layer */}
-                  <div 
-                    className="absolute bottom-0 left-0 right-0 h-[30%] opacity-[0.05] dark:opacity-[0.12]"
-                    style={{
-                      background: 'linear-gradient(135deg, #ea580c 0%, #b91c1c 100%)',
-                      clipPath: 'polygon(0% 100%, 0% 70%, 20% 50%, 35% 65%, 50% 45%, 65% 60%, 80% 40%, 100% 55%, 100% 100%)',
-                    }}
-                  />
-                  
-                  {/* Front hill layer */}
-                  <div 
-                    className="absolute bottom-0 left-0 right-0 h-[20%] opacity-[0.03] dark:opacity-[0.08]"
-                    style={{
-                      background: 'linear-gradient(135deg, #c2410c 0%, #991b1b 100%)',
-                      clipPath: 'polygon(0% 100%, 0% 80%, 25% 60%, 50% 75%, 75% 55%, 100% 70%, 100% 100%)',
-                    }}
-                  />
+                  {/* Left Column: Text Content */}
+                  <div className="flex flex-col justify-center items-start text-left py-12 lg:py-24 px-4">
+                    {/* Tag */}
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="flex items-center gap-2 mb-8"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                      <span className="text-xs font-mono uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                        New: Founder Matching v2.0
+                      </span>
+                    </motion.div>
+
+                    {/* Headline */}
+                    <motion.h1 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4, duration: 0.6 }}
+                      className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white tracking-tight leading-[1.1] mb-8"
+                    >
+                      Find your next{' '}
+                      <span className="bg-[linear-gradient(90deg,#f97316_0%,#dc2626_25%,#991b1b_50%,#dc2626_75%,#f97316_100%)] dark:bg-[linear-gradient(90deg,#fb923c_0%,#ef4444_25%,#b91c1c_50%,#ef4444_75%,#fb923c_100%)] bg-clip-text text-transparent flame-text">
+                        unicorn role
+                      </span>
+                    </motion.h1>
+
+                    {/* Subtext */}
+                    <motion.p
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl mb-10"
+                    >
+                      The first autonomous talent agent that operates everywhere you want to work. From YC seeds to Series C scaling—offload the search.
+                    </motion.p>
+
+                    {/* Buttons Placeholder (Functional part is on right, but adding visual buttons per request structure) */}
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="flex flex-wrap gap-4"
+                    >
+                      <div className="text-sm text-gray-400 italic">
+                        Use the tool on the right to start →
+                      </div>
+                    </motion.div>
+                  </div>
+
+                  {/* Right Column: Functional "Window" */}
+                  <div className="relative pt-8 lg:pt-12">
+                    {/* Main Editor Window */}
+                    <motion.div 
+                      initial={{ opacity: 0, y: 40 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                      className="relative z-20 w-full bg-white dark:bg-[#020617] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden"
+                    >
+                      {/* Editor Header */}
+                      <div className="h-10 border-b border-gray-100 dark:border-white/5 flex items-center px-4 gap-3 bg-gray-50/50 dark:bg-white/[0.02]">
+                        <div className="flex-1 text-center">
+                          <span className="text-xs font-medium text-gray-400 font-mono">Matchpoint Report</span>
+                        </div>
+                      </div>
+                      
+                      {/* Editor Content Area */}
+                      <div className="flex h-[420px]">
+                        {/* Sidebar (Fake) */}
+                        <div className="hidden sm:flex w-48 border-r border-gray-100 dark:border-white/5 flex-col py-3 bg-gray-50/30 dark:bg-white/[0.01]">
+                          <div className="px-4 py-1 flex items-center justify-between mb-2">
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Top Matches</span>
+                            <span className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">+</span>
+                          </div>
+                          <div className="px-2 space-y-1">
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 rounded-md font-mono">
+                              <img src="https://img.logo.dev/vercel.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="w-3 h-3 object-contain rounded-full" alt="Vercel" />
+                              Vercel
+                            </div>
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
+                              <img src="https://img.logo.dev/linear.app?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="w-3 h-3 object-contain rounded-full opacity-60" alt="Linear" />
+                              Linear
+                            </div>
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
+                              <img src="https://img.logo.dev/supabase.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="w-3 h-3 object-contain rounded-full opacity-60" alt="Supabase" />
+                              Supabase
+                            </div>
+                          </div>
+
+                          <div className="px-4 py-1 flex items-center justify-between mb-2 mt-4">
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Your Skills</span>
+                            <span className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">+</span>
+                          </div>
+                          <div className="px-2 space-y-1">
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
+                              <span className="text-blue-500">TS</span>
+                              TypeScript
+                            </div>
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
+                              <span className="text-yellow-500">JS</span>
+                              React
+                            </div>
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
+                              <span className="text-purple-500">AI</span>
+                              LLMs
+                            </div>
+                          </div>
+
+                          <div className="px-4 py-1 flex items-center justify-between mb-2 mt-4">
+                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Preferences</span>
+                            <span className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">+</span>
+                          </div>
+                          <div className="px-2 flex flex-wrap gap-1.5">
+                            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 font-mono">
+                              Remote Only
+                            </span>
+                            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 font-mono">
+                              Series A+
+                            </span>
+                            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 font-mono">
+                              Equity
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Main Content (Demo Report) */}
+                        <div className="flex-1 p-6 relative bg-white dark:bg-[#0B1120] overflow-y-auto custom-scrollbar">
+                          {/* Demo Report Visual */}
+                          <div className="space-y-6">
+                            {/* Match Score Card */}
+                            <div className="p-4 rounded-lg border border-green-100 bg-green-50/50 dark:border-green-900/30 dark:bg-green-900/10">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wider">Match Score</span>
+                                <span className="text-lg font-bold text-green-700 dark:text-green-400">98%</span>
+                              </div>
+                              <div className="w-full bg-green-200 dark:bg-green-900/30 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-green-500 h-full rounded-full w-[98%]" />
+                              </div>
+                            </div>
+
+                            {/* Top Match Detail */}
+                            <div>
+                              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Primary Match</h4>
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-lg border border-gray-200 dark:border-white/10 flex items-center justify-center bg-white dark:bg-white/5">
+                                  <img src="https://img.logo.dev/vercel.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="w-6 h-6 object-contain" alt="Vercel" />
+                                </div>
+                                <div>
+                                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Vercel</h3>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Frontend Infrastructure</p>
+                                  <div className="mt-2 flex flex-wrap gap-1.5">
+                                    <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-white/10 rounded text-gray-600 dark:text-gray-300">React Core</span>
+                                    <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-white/10 rounded text-gray-600 dark:text-gray-300">Next.js</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Analysis Snippet */}
+                            <div>
+                              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Why it fits</h4>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                                Your experience with high-performance React applications and edge computing aligns perfectly with Vercel's mission. Strong open source contributions signal culture fit.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
                 </div>
 
-                {/* Eyebrow / Social Proof */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 16 }}
+                {/* Bottom Section: Logo Scroll (Boxed) */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3, ease: smoothEase }}
-                  className="mb-8 relative z-10"
+                  transition={{ delay: 0.7 }}
+                  className="border border-gray-200 dark:border-white/10 bg-white dark:bg-[#020617] overflow-hidden relative h-20 flex items-center"
                 >
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/10 text-sm text-gray-600 dark:text-gray-400">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-orange-500"></span>
-                    </span>
-                    {matchCount.toLocaleString()} matches made
+                  {/* Gradient Masks */}
+                  <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white dark:from-[#020617] to-transparent z-10 pointer-events-none"></div>
+                  <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white dark:from-[#020617] to-transparent z-10 pointer-events-none"></div>
+
+                  <div className="flex gap-16 animate-scroll whitespace-nowrap hover:pause-animation w-max">
+                    {[...Array(3)].map((_, i) => (
+                      <React.Fragment key={i}>
+                        <div className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                          <img src="https://img.logo.dev/linear.app?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="h-7 object-contain" alt="Linear" />
+                        </div>
+                        <div className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                          <img src="https://img.logo.dev/cursor.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="h-6 object-contain" alt="Cursor" />
+                        </div>
+                        <div className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                          <img src="https://img.logo.dev/vercel.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="h-5 object-contain" alt="Vercel" />
+                        </div>
+                        <div className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                          <img src="https://img.logo.dev/supabase.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="h-7 object-contain" alt="Supabase" />
+                        </div>
+                        <div className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                          <img src="https://img.logo.dev/anthropic.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="h-6 object-contain" alt="Anthropic" />
+                        </div>
+                        <div className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                          <img src="https://img.logo.dev/openai.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="h-6 object-contain" alt="OpenAI" />
+                        </div>
+                        <div className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity">
+                          <img src="https://img.logo.dev/mistral.ai?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="h-6 object-contain" alt="Mistral" />
+                        </div>
+                      </React.Fragment>
+                    ))}
                   </div>
                 </motion.div>
 
-                {/* Primary Headline */}
-                <motion.h1 
-                  initial={{ opacity: 0, y: 24 }}
+                {/* Upload Section (Duplicated Window Style) */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4, ease: smoothEase }}
-                  className="text-[2.75rem] sm:text-5xl lg:text-6xl font-semibold text-gray-900 dark:text-white tracking-[-0.02em] leading-[1.1] max-w-[640px] relative z-10"
+                  transition={{ delay: 0.8 }}
+                  className="mt-12 mb-24 max-w-4xl mx-auto"
                 >
-                  Get matched to{' '}
-                  <span className="bg-[linear-gradient(90deg,#f97316_0%,#dc2626_25%,#991b1b_50%,#dc2626_75%,#f97316_100%)] dark:bg-[linear-gradient(90deg,#fb923c_0%,#ef4444_25%,#b91c1c_50%,#ef4444_75%,#fb923c_100%)] bg-clip-text text-transparent inline-block pr-[0.02em] flame-text">startups</span>{' '}
-                  instantly
-                </motion.h1>
-
-                {/* Supporting Copy */}
-                <motion.p
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5, ease: smoothEase }}
-                  className="mt-6 text-lg text-gray-500 dark:text-gray-400 max-w-[480px] leading-relaxed relative z-10"
-                >
-                  Upload your resume and discover early-stage startups that match your skills and ambitions.
-                </motion.p>
-                
-                {/* Primary CTA */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.6, ease: smoothEase }}
-                  className="mt-10 w-full max-w-[480px] relative z-10"
-                >
-                  <FileUpload onFileSelect={handleFileSelect} />
+                  <div className="relative z-20 w-full bg-white dark:bg-[#020617] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                    <div className="h-10 border-b border-gray-100 dark:border-white/5 flex items-center px-4 gap-3 bg-gray-50/50 dark:bg-white/[0.02]">
+                      <div className="flex-1 text-center">
+                        <span className="text-xs font-medium text-gray-400 font-mono">upload_resume.tsx</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-8 md:p-12 bg-gray-50/50 dark:bg-black/20">
+                      <div className="max-w-xl mx-auto">
+                        <FileUpload onFileSelect={handleFileSelect} />
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
-              </section>
 
-              {/* 
-                SOCIAL PROOF SECTION
-                Full width, subtle separator
-              */}
-              <motion.section
+              </motion.div>
+            )}
+
+            {/* Survey */}
+            {state === AppState.SURVEY && (
+              <motion.div
+                key="survey"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, ease: smoothEase }}
+                className="max-w-3xl mx-auto w-full py-12"
+              >
+                <Survey onComplete={handleSurveyComplete} onSkip={handleSkipSurvey} />
+              </motion.div>
+            )}
+
+            {/* Analyzing */}
+            {state === AppState.ANALYZING && (
+              <motion.div
+                key="analyzing"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.75, ease: smoothEase }}
-                className="py-6 border-y border-gray-200 dark:border-white/10"
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: smoothEase }}
+                className="flex-grow flex flex-col items-center justify-center"
               >
-                <p className="text-center text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] mb-4 font-mono">
-                  Join candidates matched to teams at
-                </p>
-                <LogoTicker />
-              </motion.section>
-              
-              {/* 
-                FEATURES SECTION
-                3-column grid on desktop, consistent card sizing
-              */}
-              <motion.section 
-                initial={{ opacity: 0, y: 24 }}
+                <LoadingScreen 
+                  thinkingSteps={thinkingSteps}
+                  showThinking={thinkingSteps.length > 0}
+                />
+              </motion.div>
+            )}
+
+            {/* Error */}
+            {state === AppState.ERROR && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.9, ease: smoothEase }}
-                className="py-24"
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: smoothEase }}
+                className="flex-grow flex flex-col items-center justify-center"
               >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 lg:gap-10">
-                  {features.map((item, i) => (
-                    <motion.div 
-                      key={i}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 1.0 + i * 0.08, ease: smoothEase }}
-                      className="p-6 rounded-2xl border border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02]"
+                 {/* ... Error content ... */}
+                 <div className="text-center max-w-md">
+                    <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 dark:text-red-400 font-semibold text-lg">!</div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Matching Failed</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
+                    <button 
+                      onClick={handleReset}
+                      className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-medium rounded-lg hover:opacity-90 transition-opacity duration-200"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center mb-4">
-                        <item.icon className="w-5 h-5 text-orange-600 dark:text-orange-500" />
-                      </div>
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.section>
-            </motion.div>
-          )}
+                      Try Again
+                    </button>
+                 </div>
+              </motion.div>
+            )}
 
-          {/* Survey */}
-          {state === AppState.SURVEY && (
-            <motion.div
-              key="survey"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, ease: smoothEase }}
-            >
-              <Survey onComplete={handleSurveyComplete} onSkip={handleSkipSurvey} />
-            </motion.div>
-          )}
+            {/* Results */}
+            {state === AppState.COMPLETE && matchData && (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6, ease: smoothEase }}
+                className="w-full max-w-5xl mx-auto py-12"
+              >
+                <RoastResult 
+                  data={matchData} 
+                  onReset={handleReset} 
+                />
+              </motion.div>
+            )}
 
-          {/* Analyzing */}
-          {state === AppState.ANALYZING && (
-            <motion.div
-              key="analyzing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: smoothEase }}
-              className="min-h-[60vh] flex flex-col items-center justify-center"
-            >
-              <LoadingScreen 
-                thinkingSteps={thinkingSteps}
-                showThinking={thinkingSteps.length > 0}
-              />
-            </motion.div>
-          )}
-
-          {/* Error */}
-          {state === AppState.ERROR && (
-            <motion.div
-              key="error"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: smoothEase }}
-              className="flex flex-col items-center justify-center py-20"
-            >
-              <div className="text-center max-w-md">
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1, ease: smoothEase }}
-                  className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 dark:text-red-400 font-semibold text-lg"
-                >
-                  !
-                </motion.div>
-                <motion.h3 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.15, ease: smoothEase }}
-                  className="text-lg font-semibold text-gray-900 dark:text-white mb-2"
-                >
-                  Matching Failed
-                </motion.h3>
-                <motion.p 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2, ease: smoothEase }}
-                  className="text-gray-500 dark:text-gray-400 mb-6"
-                >
-                  {error}
-                </motion.p>
-                <motion.button 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.25, ease: smoothEase }}
-                  onClick={handleReset}
-                  className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-medium rounded-lg hover:opacity-90 transition-opacity duration-200"
-                >
-                  Try Again
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Results */}
-          {state === AppState.COMPLETE && matchData && (
-            <motion.div
-              key="results"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: smoothEase }}
-            >
-              <RoastResult 
-                data={matchData} 
-                onReset={handleReset} 
-              />
-            </motion.div>
-          )}
-
-        </AnimatePresence>
-      </main>
-
-      {/* Footer */}
-      <motion.footer 
-        initial={{ opacity: 0 }}
-        animate={showContent ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 0.6, delay: 1.3, ease: smoothEase }}
-        className="max-w-6xl mx-auto px-6 py-12 border-t border-gray-100 dark:border-white/5"
-      >
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Logo className="w-5 h-5 opacity-60" />
-            <span className="text-sm font-medium text-gray-400 dark:text-gray-500">Matchpoint</span>
-          </div>
-          <p className="text-sm text-gray-400 dark:text-gray-600">
-            &copy; {new Date().getFullYear()}
-          </p>
-        </div>
-      </motion.footer>
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   );
 };

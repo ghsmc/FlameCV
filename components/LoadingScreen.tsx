@@ -81,6 +81,9 @@ const Shimmer: React.FC = () => (
   <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 );
 
+// Smooth easing curve for professional feel
+const smoothEase = [0.22, 1, 0.36, 1];
+
 // Animated dots for "thinking" effect
 const ThinkingDots: React.FC = () => (
   <span className="inline-flex ml-1">
@@ -99,6 +102,47 @@ const ThinkingDots: React.FC = () => (
   </span>
 );
 
+// Stars component
+const Stars: React.FC = () => {
+  // Generate static stars once to avoid re-renders
+  const [stars] = useState(() => 
+    Array.from({ length: 50 }).map((_, i) => ({
+      id: i,
+      top: `${Math.random() * 60}%`,
+      left: `${Math.random() * 100}%`,
+      size: Math.random() * 2 + 1,
+      delay: Math.random() * 3,
+    }))
+  );
+
+  return (
+    <div className="absolute inset-0 z-0 pointer-events-none">
+      {stars.map((star) => (
+        <motion.div
+          key={star.id}
+          className="absolute rounded-full bg-white"
+          style={{
+            top: star.top,
+            left: star.left,
+            width: star.size,
+            height: star.size,
+          }}
+          animate={{
+            opacity: [0.2, 1, 0.2],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 2 + Math.random() * 2,
+            repeat: Infinity,
+            delay: star.delay,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
 // Single thinking step card
 const ThinkingCard: React.FC<{
   step: ThinkingStep;
@@ -107,114 +151,115 @@ const ThinkingCard: React.FC<{
   onToggle: () => void;
   index: number;
   currentMessage: string;
-}> = ({ step, isLatest, isExpanded, onToggle, index, currentMessage }) => {
+  isLast: boolean;
+}> = ({ step, isLatest, isExpanded, onToggle, index, currentMessage, isLast }) => {
   const config = PHASE_CONFIG[step.phase] || { label: step.phase, messages: [] };
   const label = config.label;
   
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.4, 
-        delay: index * 0.1,
-        ease: [0.25, 0.46, 0.45, 0.94] 
-      }}
-      className={`
-        relative overflow-hidden rounded-xl border transition-all duration-300
-        ${isLatest 
-          ? 'bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 border-orange-200/60 dark:border-orange-800/40' 
-          : 'bg-gray-50/80 dark:bg-white/[0.02] border-gray-200/60 dark:border-white/[0.06]'
-        }
-      `}
-    >
-      {isLatest && <Shimmer />}
+    <div className="relative pl-8 pb-2">
+      {/* Vertical Connecting Line */}
+      {!isLast && (
+        <div className="absolute left-[11px] top-8 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+      )}
       
-      {/* Header */}
-      <button
-        onClick={onToggle}
-        className="w-full px-4 py-3.5 flex items-center gap-3 text-left relative z-10"
-      >
-        {/* Status indicator */}
-        <div className={`
-          w-2 h-2 rounded-full flex-shrink-0 transition-colors
-          ${isLatest 
-            ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]' 
-            : 'bg-gray-300 dark:bg-gray-600'
-          }
-        `}>
-          {isLatest && (
-            <motion.div
-              className="w-full h-full rounded-full bg-orange-400"
-              animate={{ scale: [1, 1.8, 1], opacity: [1, 0, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-          )}
-        </div>
-        
-        {/* Label */}
-        <div className="flex-1 min-w-0">
-          <span className={`
-            font-medium transition-colors block
-            ${isLatest 
-              ? 'text-orange-900 dark:text-orange-200' 
-              : 'text-gray-600 dark:text-gray-400'
-            }
-          `}>
-            {label}
-            {isLatest && <ThinkingDots />}
-          </span>
-          {isLatest && currentMessage && (
-            <motion.span
-              key={currentMessage}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs text-orange-600/70 dark:text-orange-400/60 block mt-0.5"
-            >
-              {currentMessage}
-            </motion.span>
-          )}
-        </div>
-        
-        {/* Expand indicator */}
-        {step.content && (
-          <motion.svg 
-            className="w-4 h-4 text-gray-400"
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </motion.svg>
-        )}
-      </button>
-
-      {/* Expandable content */}
-      <AnimatePresence>
-        {isExpanded && step.content && (
+      {/* Status Dot */}
+      <div className={`
+        absolute left-0 top-4 w-6 h-6 rounded-full border-2 flex items-center justify-center z-10 transition-colors duration-300
+        ${isLatest 
+          ? 'bg-white dark:bg-gray-900 border-orange-500' 
+          : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+        }
+      `}>
+        {isLatest && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 relative z-10">
-              <div className="pl-5 border-l-2 border-orange-200 dark:border-orange-800/40">
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {step.content.length > 400 
-                    ? step.content.slice(0, 400) + "..." 
-                    : step.content
-                  }
+            className="w-2 h-2 rounded-full bg-orange-500"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        )}
+        {!isLatest && <div className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" />}
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ 
+          duration: 0.4, 
+          delay: index * 0.1,
+          ease: [0.25, 0.46, 0.45, 0.94] 
+        }}
+        className={`
+          relative overflow-hidden rounded-xl border transition-all duration-300
+          ${isLatest 
+            ? 'bg-white/80 dark:bg-white/[0.05] border-orange-200/50 dark:border-orange-500/30 shadow-sm' 
+            : 'bg-transparent border-transparent'
+          }
+        `}
+      >
+        {isLatest && <Shimmer />}
+        
+        {/* Header */}
+        <button
+          onClick={onToggle}
+          className={`w-full px-4 py-3 flex items-center gap-3 text-left relative z-10 rounded-xl ${!isLatest && 'hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors'}`}
+        >
+          {/* Label */}
+          <div className="flex-1 min-w-0">
+            <span className={`
+              font-medium transition-colors block text-sm
+              ${isLatest 
+                ? 'text-orange-900 dark:text-orange-200' 
+                : 'text-gray-500 dark:text-gray-400'
+                }
+            `}>
+              {label}
+              {isLatest && <ThinkingDots />}
+            </span>
+          </div>
+          
+          {/* Expand indicator */}
+          {step.content && !isLatest && (
+            <motion.svg 
+              className="w-4 h-4 text-gray-400"
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </motion.svg>
+          )}
+        </button>
+
+        {/* Expandable content */}
+        <AnimatePresence>
+          {isExpanded && step.content && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 pb-4 relative z-10">
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-mono text-xs">
+                  {step.content}
+                  {isLatest && (
+                    <motion.span
+                      animate={{ opacity: [0, 1, 0] }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                      className="inline-block w-1.5 h-3 bg-orange-500 ml-1 align-middle"
+                    />
+                  )}
                 </p>
               </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
   );
 };
 
@@ -264,78 +309,193 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     }
   }, [thinkingSteps.length]);
 
+  // Calculate day/night cycle
+  // Cycle: Day -> Sunset -> Night
+  // We map 0..1 progress to a rotation angle
+  // Cap progress at 1 to stop animation at end state
+  const progress = Math.min(thinkingSteps.length / 7, 1);
+  const isNight = progress > 0.6;
+  
+  // Rotation calculation
+  // We simulate a giant wheel rotating clockwise.
+  // Sun starts at ~10 o'clock (300 deg) relative to bottom center? 
+  // Let's keep it simple:
+  // 0 deg = Sun at top-leftish
+  // 180 deg = Sun has set (bottom-right), Moon has risen (top-leftish)
+  const rotation = progress * 180; 
+
   if (showThinking && thinkingSteps.length > 0) {
     return (
-      <div className="w-full max-w-xl mx-auto">
-        {/* Header */}
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden">
+        {/* Animated Landscape Background */}
         <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 mb-8"
+          className="absolute inset-0 z-0"
+          animate={{
+            background: isNight 
+              ? 'linear-gradient(to bottom, #020617 0%, #1e1b4b 100%)' // Deep Night
+              : progress > 0.4 
+                ? 'linear-gradient(to bottom, #4c1d95 0%, #db2777 50%, #ea580c 100%)' // Sunset
+                : 'linear-gradient(to bottom, #38bdf8 0%, #bae6fd 100%)' // Day
+          }}
+          transition={{ duration: 2, ease: "easeInOut" }}
         >
-          {/* Animated orb */}
-          <div className="relative w-10 h-10">
-            <motion.div
-              className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
-              animate={{ 
-                scale: [1, 1.1, 1],
-                opacity: [0.7, 1, 0.7]
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute inset-1 rounded-full bg-gradient-to-br from-orange-300 to-orange-500"
-              animate={{ 
-                scale: [1, 0.9, 1],
-              }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <div className="absolute inset-2 rounded-full bg-white dark:bg-gray-900" />
-            <motion.div
-              className="absolute inset-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
-          
-          <div>
-            <motion.h2 
-              key={statusText}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-lg font-semibold text-gray-900 dark:text-white"
-            >
-              {statusText}
-              <ThinkingDots />
-            </motion.h2>
-            <AnimatePresence mode="wait">
-              <motion.p 
-                key={currentPhaseMessage}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                transition={{ duration: 0.2 }}
-                className="text-sm text-gray-500 dark:text-gray-400"
-              >
-                {currentPhaseMessage || "Reasoning through your profile"}
-              </motion.p>
-            </AnimatePresence>
+          {/* Stars Layer (fades in at night) */}
+          <motion.div 
+            className="absolute inset-0"
+            animate={{ opacity: isNight ? 1 : 0 }}
+            transition={{ duration: 2 }}
+          >
+            <Stars />
+          </motion.div>
+
+          {/* Celestial Rotating Container */}
+          <motion.div
+            className="absolute left-1/2 bottom-0 w-[200vmax] h-[200vmax] origin-center"
+            style={{ 
+              marginBottom: '-200vmax', // Push mostly offscreen so center is at bottom of screen
+              marginLeft: '-100vmax', // Center horizontally
+            }}
+            animate={{ rotate: rotation }} 
+            transition={{ type: "spring", stiffness: 10, damping: 20 }} // Smooth spring for rotation
+          >
+            {/* SUN (Start position: Top Left of the wheel) */}
+            {/* Position relative to center of huge circle */}
+            <div className="absolute top-[15%] left-[25%] -translate-x-1/2 -translate-y-1/2">
+               <div className="relative w-32 h-32 sm:w-48 sm:h-48">
+                 <div className="absolute inset-0 rounded-full bg-orange-400 blur-3xl opacity-60" />
+                 <div className="absolute inset-4 rounded-full bg-orange-300 blur-2xl opacity-80" />
+                 <div className="absolute inset-8 rounded-full bg-orange-100 blur-xl" />
+                 <div className="absolute inset-10 rounded-full bg-white shadow-[0_0_100px_rgba(251,146,60,0.8)]" />
+               </div>
+            </div>
+
+            {/* MOON (Opposite side: Bottom Right of the wheel) */}
+            <div className="absolute bottom-[15%] right-[25%] -translate-x-1/2 -translate-y-1/2 rotate-180">
+               <div className="relative w-24 h-24 sm:w-32 sm:h-32">
+                 <div className="absolute inset-0 rounded-full bg-slate-200 blur-xl opacity-20" />
+                 <div className="absolute inset-2 rounded-full bg-slate-100 blur-md opacity-90" />
+                 {/* Craters */}
+                 <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-slate-300/50 rounded-full blur-[1px]" />
+                 <div className="absolute bottom-1/3 right-1/4 w-6 h-6 bg-slate-300/40 rounded-full blur-[1px]" />
+                 <div className="absolute inset-0 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.4)]" />
+               </div>
+            </div>
+          </motion.div>
+
+          {/* Mountains (Static structure, dynamic color) */}
+          <div className="absolute bottom-0 left-0 right-0 h-full pointer-events-none z-10">
+             {/* Back mountain layer */}
+             <motion.div 
+               className="absolute bottom-0 left-0 right-0 h-[45%]"
+               animate={{
+                 filter: isNight 
+                   ? 'brightness(0.2) contrast(1.1) hue-rotate(-15deg)' 
+                   : progress > 0.4 
+                     ? 'brightness(0.6) sepia(0.4) hue-rotate(-10deg)' 
+                     : 'brightness(1) contrast(1)'
+               }}
+               transition={{ duration: 2 }}
+               style={{
+                 background: 'linear-gradient(180deg, #fdba74 0%, #f97316 100%)',
+                 clipPath: 'polygon(0% 100%, 0% 40%, 15% 20%, 30% 35%, 45% 15%, 60% 30%, 75% 10%, 90% 25%, 100% 20%, 100% 100%)',
+               }}
+             />
+             
+             {/* Middle mountain layer */}
+             <motion.div 
+               className="absolute bottom-0 left-0 right-0 h-[35%]"
+               animate={{
+                 filter: isNight 
+                   ? 'brightness(0.15) contrast(1.1) hue-rotate(-15deg)' 
+                   : progress > 0.4 
+                     ? 'brightness(0.5) sepia(0.5) hue-rotate(-15deg)' 
+                     : 'brightness(1) contrast(1)'
+               }}
+               transition={{ duration: 2 }}
+               style={{
+                 background: 'linear-gradient(180deg, #fb923c 0%, #ea580c 100%)',
+                 clipPath: 'polygon(0% 100%, 0% 60%, 20% 35%, 35% 55%, 50% 30%, 65% 45%, 80% 25%, 100% 40%, 100% 100%)',
+               }}
+             />
+             
+             {/* Front hill layer */}
+             <motion.div 
+               className="absolute bottom-0 left-0 right-0 h-[25%]"
+               animate={{
+                 filter: isNight 
+                   ? 'brightness(0.1) contrast(1.2) hue-rotate(-20deg)' 
+                   : progress > 0.4 
+                     ? 'brightness(0.4) sepia(0.6) hue-rotate(-20deg)' 
+                     : 'brightness(1) contrast(1)'
+               }}
+               transition={{ duration: 2 }}
+               style={{
+                 background: 'linear-gradient(180deg, #f97316 0%, #dc2626 100%)',
+                 clipPath: 'polygon(0% 100%, 0% 75%, 25% 55%, 50% 70%, 75% 50%, 100% 65%, 100% 100%)',
+               }}
+             />
           </div>
         </motion.div>
 
-        {/* Thinking steps */}
-        <div className="space-y-3">
-          {thinkingSteps.map((step, index) => (
-            <ThinkingCard
-              key={`${step.phase}-${index}`}
-              step={step}
-              isLatest={index === thinkingSteps.length - 1}
-              isExpanded={expandedStep === index}
-              onToggle={() => setExpandedStep(expandedStep === index ? null : index)}
-              index={index}
-              currentMessage={index === thinkingSteps.length - 1 ? currentPhaseMessage : ""}
-            />
-          ))}
+        {/* Content Overlay */}
+        <div className="relative z-20 w-full max-w-xl px-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8"
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-8">
+              <div className="relative w-10 h-10">
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
+                  animate={{ 
+                    scale: [1, 1.1, 1],
+                    opacity: [0.7, 1, 0.7]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div className="absolute inset-2 rounded-full bg-white dark:bg-gray-900" />
+                <motion.div
+                  className="absolute inset-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
+              </div>
+              
+              <div>
+                <motion.h2 
+                  key={statusText}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="text-lg font-semibold text-gray-900 dark:text-white relative inline-block"
+                >
+                  <span className="relative z-10">Thinking...</span>
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/20 -skew-x-12"
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+                  />
+                </motion.h2>
+              </div>
+            </div>
+
+            {/* Thinking steps */}
+            <div className="space-y-3 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
+              {thinkingSteps.map((step, index) => (
+                <ThinkingCard
+                  key={`${step.phase}-${index}`}
+                  step={step}
+                  isLatest={index === thinkingSteps.length - 1}
+                  isExpanded={expandedStep === index}
+                  onToggle={() => setExpandedStep(expandedStep === index ? null : index)}
+                  index={index}
+                  currentMessage={index === thinkingSteps.length - 1 ? currentPhaseMessage : ""}
+                  isLast={index === thinkingSteps.length - 1}
+                />
+              ))}
+            </div>
+          </motion.div>
         </div>
       </div>
     );

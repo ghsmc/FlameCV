@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CompanyMatch, CareerAdvice } from '../types';
-import { 
-  BriefcaseIcon, 
-  CurrencyDollarIcon, 
-  UserIcon, 
-  ArrowTrendingUpIcon, 
-  ShieldCheckIcon, 
-  SparklesIcon, 
-  ArrowTopRightOnSquareIcon,
+import { SwipeDeck } from './SwipeDeck';
+import {
+  BriefcaseIcon,
+  CurrencyDollarIcon,
+  UserIcon,
+  ArrowTrendingUpIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
   UsersIcon,
   CalendarIcon,
   MapPinIcon,
   BuildingOfficeIcon,
   CommandLineIcon,
   ChevronDownIcon,
+  CheckIcon,
+  XMarkIcon,
+  HandRaisedIcon,
 } from '@heroicons/react/24/outline';
 
 interface TargetCompaniesProps {
@@ -37,13 +40,27 @@ const getMatchScoreColor = (score?: number) => {
   return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
 };
 
-const CompanyCard: React.FC<{ 
-  company: CompanyMatch; 
+const CompanyCard: React.FC<{
+  company: CompanyMatch;
   index: number;
   tierColor: string;
-}> = ({ company, index, tierColor }) => {
+  onAction: (company: CompanyMatch, action: 'yes' | 'no') => void;
+}> = ({ company, index, tierColor, onAction }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const careerUrl = getCareerPageUrl(company.domain);
+
+  const handleYes = () => {
+    window.open(careerUrl, '_blank');
+    onAction(company, 'yes');
+  };
+
+  const handleNo = () => {
+    setIsHidden(true);
+    onAction(company, 'no');
+  };
+
+  if (isHidden) return null;
 
   return (
     <motion.div
@@ -190,34 +207,42 @@ const CompanyCard: React.FC<{
         </AnimatePresence>
       </div>
 
-      {/* Action Footer */}
+      {/* Action Footer - Yes/No Buttons */}
       <div className="mt-auto border-t border-gray-100 dark:border-white/5 p-3 bg-gray-50/50 dark:bg-white/[0.02]">
-        <a
-          href={careerUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-semibold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
-        >
-          View Careers
-          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-        </a>
+        <div className="flex gap-2">
+          <button
+            onClick={handleNo}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-200 dark:border-red-800/30"
+          >
+            <XMarkIcon className="w-4 h-4" />
+            No
+          </button>
+          <button
+            onClick={handleYes}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-green-500 rounded-xl hover:bg-green-600 transition-colors"
+          >
+            <CheckIcon className="w-4 h-4" />
+            Yes
+          </button>
+        </div>
       </div>
     </motion.div>
   );
 };
 
-const TierSection: React.FC<{ 
-  title: string; 
+const TierSection: React.FC<{
+  title: string;
   subtitle: string;
-  icon: React.ReactNode; 
-  companies: CompanyMatch[]; 
-  colorClass: string; 
-  bgClass: string; 
-}> = ({ title, subtitle, icon, companies, colorClass, bgClass }) => {
+  icon: React.ReactNode;
+  companies: CompanyMatch[];
+  colorClass: string;
+  bgClass: string;
+  onCompanyAction: (company: CompanyMatch, action: 'yes' | 'no') => void;
+}> = ({ title, subtitle, icon, companies, colorClass, bgClass, onCompanyAction }) => {
   if (companies.length === 0) return null;
-  
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col gap-6"
@@ -241,15 +266,16 @@ const TierSection: React.FC<{
           </p>
         </div>
       </div>
-      
+
       {/* Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {companies.map((company, index) => (
-          <CompanyCard 
-            key={`${company.name}-${index}`} 
+          <CompanyCard
+            key={`${company.name}-${index}`}
             company={company}
             index={index}
             tierColor={`${bgClass} ${colorClass}`}
+            onAction={onCompanyAction}
           />
         ))}
       </div>
@@ -258,14 +284,26 @@ const TierSection: React.FC<{
 };
 
 export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, companies }) => {
+  const [showSwipeMode, setShowSwipeMode] = useState(false);
+  const [removedCompanies, setRemovedCompanies] = useState<Set<string>>(new Set());
+
   const displayCompanies = careerAdvice?.companyMatches || companies || [];
-  
+
   if (!careerAdvice && displayCompanies.length === 0) return null;
 
+  // Filter out removed companies
+  const activeCompanies = displayCompanies.filter(c => !removedCompanies.has(c.name));
+
   // Group by tiers
-  const reach = displayCompanies.filter(c => c.tier === 'Reach');
-  const target = displayCompanies.filter(c => c.tier === 'Target');
-  const safety = displayCompanies.filter(c => c.tier === 'Safety');
+  const reach = activeCompanies.filter(c => c.tier === 'Reach');
+  const target = activeCompanies.filter(c => c.tier === 'Target');
+  const safety = activeCompanies.filter(c => c.tier === 'Safety');
+
+  const handleCompanyAction = (company: CompanyMatch, action: 'yes' | 'no') => {
+    if (action === 'no') {
+      setRemovedCompanies(prev => new Set([...prev, company.name]));
+    }
+  };
 
   return (
     <div className="w-full">
@@ -345,7 +383,7 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
         <div className="flex items-center justify-between py-4 px-6 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
           <div className="flex items-center gap-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{displayCompanies.length}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{activeCompanies.length}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Matches</div>
             </div>
             <div className="w-px h-8 bg-gray-200 dark:bg-white/10" />
@@ -364,37 +402,58 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
               </span>
             </div>
           </div>
+          <button
+            onClick={() => setShowSwipeMode(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold rounded-xl hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg"
+          >
+            <HandRaisedIcon className="w-4 h-4" />
+            Swipe Mode
+          </button>
         </div>
 
         {/* Tiered Company Matches */}
         <div className="flex flex-col gap-16">
-          <TierSection 
-            title="Reach" 
+          <TierSection
+            title="Reach"
             subtitle="Ambitious targets — stretch but achievable"
-            icon={<SparklesIcon className="w-6 h-6" />} 
-            companies={reach} 
+            icon={<SparklesIcon className="w-6 h-6" />}
+            companies={reach}
             colorClass="text-purple-600 dark:text-purple-400"
             bgClass="bg-purple-50 dark:bg-purple-900/20"
+            onCompanyAction={handleCompanyAction}
           />
-          <TierSection 
-            title="Target" 
+          <TierSection
+            title="Target"
             subtitle="Great mutual fit — strong chance of success"
-            icon={<ArrowTrendingUpIcon className="w-6 h-6" />} 
-            companies={target} 
+            icon={<ArrowTrendingUpIcon className="w-6 h-6" />}
+            companies={target}
             colorClass="text-green-600 dark:text-green-400"
             bgClass="bg-green-50 dark:bg-green-900/20"
+            onCompanyAction={handleCompanyAction}
           />
-          <TierSection 
-            title="Safety" 
+          <TierSection
+            title="Safety"
             subtitle="High likelihood — you'd be a strong candidate"
-            icon={<ShieldCheckIcon className="w-6 h-6" />} 
-            companies={safety} 
+            icon={<ShieldCheckIcon className="w-6 h-6" />}
+            companies={safety}
             colorClass="text-blue-600 dark:text-blue-400"
             bgClass="bg-blue-50 dark:bg-blue-900/20"
+            onCompanyAction={handleCompanyAction}
           />
         </div>
 
       </div>
+
+      {/* Swipe Mode Overlay */}
+      <AnimatePresence>
+        {showSwipeMode && (
+          <SwipeDeck
+            companies={activeCompanies}
+            onClose={() => setShowSwipeMode(false)}
+            onCompanyAction={handleCompanyAction}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

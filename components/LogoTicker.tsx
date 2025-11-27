@@ -19,14 +19,14 @@ const LOGOS = [
 
 export const LogoTicker: React.FC = () => {
   return (
-    <div className="w-full overflow-hidden py-10 mask-gradient-x relative">
+    <div className="w-full overflow-hidden py-6 mask-gradient-x relative">
       {/* Gradient Masks */}
       <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white dark:from-[#020617] to-transparent z-10 pointer-events-none"></div>
       <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white dark:from-[#020617] to-transparent z-10 pointer-events-none"></div>
 
-      <div className="flex gap-12 animate-scroll whitespace-nowrap hover:pause-animation">
+      <div className="flex gap-12 animate-scroll whitespace-nowrap hover:pause-animation w-max">
         {/* Double the list for seamless scrolling */}
-        {[...LOGOS, ...LOGOS, ...LOGOS].map((logo, i) => (
+        {[...LOGOS, ...LOGOS, ...LOGOS, ...LOGOS].map((logo, i) => (
           <div 
             key={`${logo.name}-${i}`} 
             className="flex flex-col items-center justify-center shrink-0 transition-transform duration-300 hover:scale-110"

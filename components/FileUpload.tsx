@@ -81,8 +81,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
           relative cursor-pointer
           border-2 border-dashed rounded-2xl p-12 transition-all duration-200
           flex flex-col items-center justify-center text-center
-          border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.02]
-          hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-white/[0.03]
+          border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-white/[0.03] backdrop-blur-sm
+          hover:border-gray-300 dark:hover:border-gray-700 hover:bg-white/95 dark:hover:bg-white/[0.05]
         `}
       >
         <input
