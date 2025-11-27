@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design System: 8px spacing rhythm, 4-column mobile / 12-column desktop */
+:root {
+  --space-unit: 8px;
+  --content-max: 1120px;
+  --content-narrow: 680px;
+}
+
 @layer utilities {
   .mask-gradient-x {
     mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
@@ -28,8 +35,30 @@
 }
 
 @keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
   100% {
     transform: translateX(100%);
   }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Flame shimmer effect for gradient text - seamless loop */
+@keyframes flame-sweep {
+  0% {
+    background-position: 200% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.flame-text {
+  background-size: 200% 100%;
+  animation: flame-sweep 2.5s linear infinite;
 }
 

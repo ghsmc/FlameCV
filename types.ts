@@ -3,8 +3,6 @@ export enum AppState {
   SURVEY = 'SURVEY',
   ANALYZING = 'ANALYZING',
   COMPLETE = 'COMPLETE',
-  FIXING = 'FIXING',
-  FIX_COMPLETE = 'FIX_COMPLETE',
   ERROR = 'ERROR',
 }
 
@@ -25,6 +23,28 @@ export interface CompanyMatch {
   description?: string;
   location?: string;
   funding?: string;
+  // Enhanced fields
+  employeeCount?: string;       // e.g., "10-25", "50-100"
+  industry?: string;            // e.g., "Fintech", "Developer Tools"
+  foundedYear?: string;         // e.g., "2023"
+  techStack?: string[];         // e.g., ["React", "Python", "AWS"]
+  investors?: string[];         // e.g., ["Y Combinator", "a16z"]
+  hiringRoles?: string[];       // e.g., ["Senior Engineer", "Product Manager"]
+  linkedinUrl?: string;         // Direct company LinkedIn URL
+  matchScore?: number;          // 0-100 match percentage
+}
+
+export interface ReasoningStep {
+  title: string;
+  content: string;
+  insights: string[];
+}
+
+export interface ThinkingProcess {
+  resumeAnalysis: ReasoningStep;
+  preferencesAnalysis: ReasoningStep;
+  intersectionAnalysis: ReasoningStep;
+  searchStrategy: ReasoningStep;
 }
 
 export interface CareerAdvice {
@@ -41,6 +61,7 @@ export interface AnalysisData {
   summary: string;
   markdownContent: string;
   careerAdvice?: CareerAdvice;
+  thinking?: ThinkingProcess;
 }
 
 export interface FileData {

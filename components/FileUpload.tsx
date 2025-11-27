@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FileData } from '../types';
 import { ArrowUpTrayIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
 interface FileUploadProps {
   onFileSelect: (file: FileData) => void;
 }
+
+const smoothEase = [0.22, 1, 0.36, 1];
 
 export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -65,18 +68,21 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      <div
+      <motion.div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        animate={{ 
+          borderColor: isDragging ? '#f97316' : undefined,
+          backgroundColor: isDragging ? 'rgba(249, 115, 22, 0.02)' : undefined
+        }}
+        transition={{ duration: 0.2, ease: smoothEase }}
         className={`
-          relative group cursor-pointer
-          border rounded-xl p-12 transition-all duration-300 ease-out
+          relative cursor-pointer
+          border-2 border-dashed rounded-2xl p-12 transition-all duration-200
           flex flex-col items-center justify-center text-center
-          ${isDragging 
-            ? 'border-orange-500 bg-orange-50/50 dark:bg-orange-900/10 scale-[1.01] shadow-lg ring-1 ring-orange-500/20' 
-            : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-600 hover:-translate-y-0.5'
-          }
+          border-gray-200 dark:border-gray-800 bg-white dark:bg-white/[0.02]
+          hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-white/[0.03]
         `}
       >
         <input
@@ -87,36 +93,48 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
         />
         
         <div className={`
-          mb-6 p-4 rounded-full shadow-sm border transition-all duration-300
+          mb-6 p-4 rounded-xl transition-all duration-200
           ${isDragging 
-            ? 'bg-orange-100 dark:bg-orange-900/30 border-orange-200 dark:border-orange-800' 
-            : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 group-hover:scale-110 group-hover:bg-white dark:group-hover:bg-gray-700'
+            ? 'bg-orange-100 dark:bg-orange-900/20' 
+            : 'bg-gray-100 dark:bg-white/5'
           }
         `}>
-          <ArrowUpTrayIcon className={`w-6 h-6 ${isDragging ? 'text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-white'}`} />
+          <ArrowUpTrayIcon className={`w-6 h-6 transition-colors duration-200 ${
+            isDragging 
+              ? 'text-orange-600 dark:text-orange-400' 
+              : 'text-gray-500 dark:text-gray-400'
+          }`} />
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 tracking-tight">
-          Upload resume
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          {isDragging ? "Drop to upload" : "Upload your resume"}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 max-w-xs leading-relaxed">
-          Drop your PDF here, or click to browse.
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xs">
+          {isDragging ? "Release to upload your file" : "Drag and drop your PDF, or click to browse"}
         </p>
 
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-lg">
             <DocumentTextIcon className="w-3.5 h-3.5" />
             PDF, TXT, IMG
           </span>
           <span className="text-xs text-gray-400 dark:text-gray-500">Max 10MB</span>
         </div>
-      </div>
+      </motion.div>
 
-      {error && (
-        <div className="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-lg text-center animate-in fade-in slide-in-from-top-1">
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: smoothEase }}
+            className="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-lg text-center"
+          >
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
