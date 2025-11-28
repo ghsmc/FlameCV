@@ -195,7 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         onClick={onToggle}
         animate={{ left: isOpen ? 292 : 24 }}
         transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="fixed top-6 z-50 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+        className="fixed top-[30px] z-50 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
       >
         <svg 
           className="w-5 h-5 text-gray-600 dark:text-gray-400" 
