@@ -82,21 +82,21 @@ export const HistoryList: React.FC<HistoryListProps> = ({ history, onSelect, onC
                   <span className="text-xs text-gray-500 dark:text-gray-500 font-medium">
                     {matches.length} matches:
                   </span>
-                  <div className="flex items-center -space-x-2">
+                  <div className="flex items-center gap-2">
                     {topMatches.map((company, i) => (
                       <img
                         key={i}
                         src={`https://img.logo.dev/${company.domain}?token=pk_c2nKhfMyRIOeCjrk-6-RRw`}
                         alt={company.name}
                         title={company.name}
-                        className="w-8 h-8 rounded-lg border-2 border-white dark:border-gray-900 bg-white object-contain"
+                        className="w-8 h-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white object-contain"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=f3f4f6&color=6b7280&size=32`;
                         }}
                       />
                     ))}
                     {remainingCount > 0 && (
-                      <div className="w-8 h-8 rounded-lg border-2 border-white dark:border-gray-900 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                         <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                           +{remainingCount}
                         </span>
