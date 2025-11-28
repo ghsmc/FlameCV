@@ -6,6 +6,7 @@ import { RoastResult } from './components/RoastResult';
 import { Survey } from './components/Survey';
 import { AuthModal } from './components/AuthModal';
 import { Sidebar } from './components/Sidebar';
+import { LogoTicker } from './components/LogoTicker';
 import { AppState, FileData, AnalysisData, HistoryItem, UserPreferences } from './types';
 import { generateRoast } from './services/gemini';
 import { saveResume, getResumes, getResumeCount, signIn, signUp, signOut, signInWithGoogle, getCurrentUser, onAuthStateChange, User } from './services/supabase';
@@ -357,9 +358,19 @@ const App: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
-                  className="w-full max-w-md p-4 sm:p-6 bg-white/80 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 shadow-xl shadow-orange-500/10"
+                  className="w-full max-w-md p-4 sm:p-6 bg-white/80 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 shadow-xl shadow-orange-500/10 mb-8 sm:mb-12"
                 >
                   <FileUpload onFileSelect={handleFileSelect} />
+                </motion.div>
+
+                {/* Logo Ticker */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7, duration: 0.6 }}
+                  className="w-full max-w-4xl"
+                >
+                  <LogoTicker />
                 </motion.div>
               </motion.div>
             )}
