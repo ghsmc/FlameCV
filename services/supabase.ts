@@ -17,22 +17,137 @@ export const supabase = supabaseUrl && supabaseAnonKey
 // Database table name
 const RESUMES_TABLE = 'resumes';
 
+// Storage bucket name
+const RESUMES_BUCKET = 'resumes';
+
 export interface ResumeRecord {
   id: string;
   created_at: string;
   file_name: string;
-  file_data: FileData;
+  file_url?: string;
+  file_type?: string;
+  file_size?: number;
+  file_data?: FileData; // DEPRECATED: Legacy support
   analysis: AnalysisData;
-  user_id?: string; // Optional: for future user authentication
+  user_id?: string;
 }
+
+// ============================================================
+// STORAGE FUNCTIONS
+// ============================================================
+
+/**
+ * Upload a resume file to Supabase Storage
+ */
+export const uploadResumeFile = async (
+  file: File,
+  userId: string,
+  resumeId: string
+): Promise<string | null> => {
+  if (!supabase) {
+    console.error('Supabase not initialized');
+    return null;
+  }
+
+  try {
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${userId}/${resumeId}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from(RESUMES_BUCKET)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (error) {
+      console.error('Error uploading file:', error);
+      return null;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from(RESUMES_BUCKET)
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (err) {
+    console.error('Error uploading file:', err);
+    return null;
+  }
+};
+
+/**
+ * Download a resume file from Supabase Storage
+ */
+export const downloadResumeFile = async (fileUrl: string): Promise<Blob | null> => {
+  if (!supabase) {
+    console.error('Supabase not initialized');
+    return null;
+  }
+
+  try {
+    // Extract file path from URL
+    const url = new URL(fileUrl);
+    const pathParts = url.pathname.split('/');
+    const filePath = pathParts.slice(-2).join('/'); // userId/resumeId.ext
+
+    const { data, error } = await supabase.storage
+      .from(RESUMES_BUCKET)
+      .download(filePath);
+
+    if (error) {
+      console.error('Error downloading file:', error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error downloading file:', err);
+    return null;
+  }
+};
+
+/**
+ * Delete a resume file from Supabase Storage
+ */
+export const deleteResumeFile = async (fileUrl: string): Promise<boolean> => {
+  if (!supabase) {
+    console.error('Supabase not initialized');
+    return false;
+  }
+
+  try {
+    // Extract file path from URL
+    const url = new URL(fileUrl);
+    const pathParts = url.pathname.split('/');
+    const filePath = pathParts.slice(-2).join('/'); // userId/resumeId.ext
+
+    const { error } = await supabase.storage
+      .from(RESUMES_BUCKET)
+      .remove([filePath]);
+
+    if (error) {
+      console.error('Error deleting file:', error);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Error deleting file:', err);
+    return false;
+  }
+};
 
 /**
  * Save a resume and its analysis to the database
+ * Now uses Supabase Storage instead of storing base64 in DB
  */
 export const saveResume = async (
   file: FileData,
   analysis: AnalysisData,
-  userId?: string
+  userId?: string,
+  originalFile?: File
 ): Promise<HistoryItem | null> => {
   if (!supabase) {
     console.error('Supabase not initialized');
@@ -40,9 +155,10 @@ export const saveResume = async (
   }
 
   try {
-    const record: Omit<ResumeRecord, 'id' | 'created_at'> = {
+    // First, insert the record to get the ID
+    const record: Partial<ResumeRecord> = {
       file_name: file.name,
-      file_data: file,
+      file_type: file.mimeType,
       analysis: analysis,
       user_id: userId,
     };
@@ -58,12 +174,34 @@ export const saveResume = async (
       return null;
     }
 
+    // If originalFile and userId are provided, upload to storage
+    if (originalFile && userId) {
+      const fileUrl = await uploadResumeFile(originalFile, userId, data.id);
+      
+      if (fileUrl) {
+        // Update record with file URL
+        await supabase
+          .from(RESUMES_TABLE)
+          .update({ 
+            file_url: fileUrl,
+            file_size: originalFile.size 
+          })
+          .eq('id', data.id);
+      }
+    } else {
+      // Fallback: Store base64 in DB (legacy support)
+      await supabase
+        .from(RESUMES_TABLE)
+        .update({ file_data: file })
+        .eq('id', data.id);
+    }
+
     return {
       id: data.id,
       timestamp: new Date(data.created_at).getTime(),
       fileName: data.file_name,
       analysis: data.analysis,
-      resume: data.file_data,
+      resume: file,
     };
   } catch (err) {
     console.error('Error saving resume:', err);

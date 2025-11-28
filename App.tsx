@@ -5,11 +5,12 @@ import { LoadingScreen, ThinkingStep } from './components/LoadingScreen';
 import { RoastResult } from './components/RoastResult';
 import { Survey } from './components/Survey';
 import { AuthModal } from './components/AuthModal';
+import { HistoryList } from './components/HistoryList';
 import { AppState, FileData, AnalysisData, HistoryItem, UserPreferences } from './types';
 import { generateRoast } from './services/gemini';
 import { saveResume, getResumes, getResumeCount, signIn, signUp, signOut, signInWithGoogle, getCurrentUser, onAuthStateChange, User } from './services/supabase';
 import { Logo } from './components/Logo';
-import { SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { SunIcon, MoonIcon, ArrowRightOnRectangleIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 // Smooth easing curve for professional feel
 const smoothEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -27,6 +28,7 @@ const App: React.FC = () => {
   const [showContent, setShowContent] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -104,7 +106,7 @@ const App: React.FC = () => {
 
   const addToHistory = async (file: FileData, data: AnalysisData) => {
     try {
-      const newItem = await saveResume(file, data, user?.id);
+      const newItem = await saveResume(file, data, user?.id, file.originalFile);
       if (newItem) {
         setHistory([newItem, ...history]);
         const count = await getResumeCount(user?.id);
@@ -178,6 +180,22 @@ const App: React.FC = () => {
     setPreferences(null);
     setError(null);
     setThinkingSteps([]);
+    setShowHistory(false);
+  };
+
+  const handleHistorySelect = (item: HistoryItem) => {
+    setMatchData(item.analysis);
+    setCurrentFile(item.resume);
+    setState(AppState.COMPLETE);
+    setShowHistory(false);
+  };
+
+  const handleClearHistory = async () => {
+    if (confirm('Are you sure you want to clear your match history?')) {
+      setHistory([]);
+      setMatchCount(0);
+      // TODO: Implement clearAllResumes(user?.id) when needed
+    }
   };
 
   return (
@@ -232,7 +250,19 @@ const App: React.FC = () => {
                 <div className="w-px h-5 bg-gray-200 dark:bg-white/10" />
                 {user ? (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-600 dark:text-gray-400 hidden sm:inline">
+                    {matchCount > 0 && (
+                      <button
+                        onClick={() => setShowHistory(!showHistory)}
+                        className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                      >
+                        <ClockIcon className="w-4 h-4" />
+                        <span className="hidden sm:inline">My Matches</span>
+                        <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full font-semibold">
+                          {matchCount}
+                        </span>
+                      </button>
+                    )}
+                    <span className="text-sm text-gray-600 dark:text-gray-400 hidden md:inline">
                       {user.email}
                     </span>
                     <button
@@ -268,8 +298,40 @@ const App: React.FC = () => {
         <main className="flex-grow flex flex-col">
           <AnimatePresence mode="wait">
 
+            {/* History View */}
+            {showHistory && user && history.length > 0 && (
+              <motion.div
+                key="history"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                className="w-full max-w-5xl mx-auto py-12"
+              >
+                <div className="mb-8">
+                  <button
+                    onClick={() => setShowHistory(false)}
+                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
+                  >
+                    ← Back
+                  </button>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    My Matches
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    View and revisit your previous startup matches
+                  </p>
+                </div>
+                <HistoryList
+                  history={history}
+                  onSelect={handleHistorySelect}
+                  onClear={handleClearHistory}
+                />
+              </motion.div>
+            )}
+
             {/* Landing Page - Centered Layout */}
-            {state === AppState.IDLE && showContent && (
+            {state === AppState.IDLE && showContent && !showHistory && (
               <motion.div
                 key="landing"
                 initial={{ opacity: 0 }}

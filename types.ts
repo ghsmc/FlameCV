@@ -68,6 +68,7 @@ export interface FileData {
   base64: string;
   mimeType: string;
   name: string;
+  originalFile?: File; // For storage upload
 }
 
 export interface AnalysisError {

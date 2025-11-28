@@ -35,6 +35,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
         base64,
         mimeType: file.type,
         name: file.name,
+        originalFile: file, // Keep reference for storage upload
       });
     };
     reader.onerror = () => setError("Failed to process file.");

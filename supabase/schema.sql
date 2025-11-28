@@ -3,9 +3,12 @@ CREATE TABLE IF NOT EXISTS resumes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   file_name TEXT NOT NULL,
-  file_data JSONB NOT NULL, -- Stores FileData: { base64, mimeType, name }
+  file_url TEXT, -- Storage URL for the resume file
+  file_type TEXT, -- MIME type (application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document)
+  file_size INTEGER, -- File size in bytes
+  file_data JSONB, -- DEPRECATED: Legacy base64 storage (to be removed)
   analysis JSONB NOT NULL, -- Stores AnalysisData: { score, grade, summary, markdownContent, careerAdvice }
-  user_id TEXT -- Optional: for future user authentication
+  user_id TEXT -- Required: auth.uid() of the owner
 );
 
 -- Create index on created_at for faster sorting
