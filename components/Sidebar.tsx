@@ -95,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -280, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed left-0 top-0 bottom-0 w-[280px] bg-white/80 dark:bg-[#020617]/95 backdrop-blur-xl border-r border-gray-200/50 dark:border-white/5 z-40 flex flex-col"
+            className="fixed left-0 top-0 bottom-0 w-[85vw] sm:w-[280px] max-w-[280px] bg-white dark:bg-[#020617] border-r border-gray-200/50 dark:border-white/5 z-40 flex flex-col"
           >
             {/* Header */}
             <div className="p-4 border-b border-gray-100 dark:border-white/5">

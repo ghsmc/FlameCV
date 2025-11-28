@@ -207,7 +207,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ history, onSelect, onC
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-green-500" />
+                            <span className="w-2 h-2 rounded-full bg-amber-500" />
                             <span className="text-xs text-gray-500 dark:text-gray-400">
                               {matches.filter(m => m.tier === 'Target').length} Target
                             </span>

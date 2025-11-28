@@ -247,7 +247,7 @@ const App: React.FC = () => {
         }}
         transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <div className="max-w-5xl mx-auto px-6 w-full flex flex-col flex-1">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 w-full flex flex-col flex-1">
 
         {/* Header - Floating Navbar */}
         <motion.header
@@ -256,50 +256,50 @@ const App: React.FC = () => {
           transition={{ duration: 0.6, ease: smoothEase }}
           className="w-full py-4"
         >
-          <div className="border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl rounded-xl px-6 py-3">
+          <div className="border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl rounded-xl px-3 sm:px-6 py-2.5 sm:py-3">
             <div className="flex items-center justify-between">
               <div
-                className="flex items-center gap-2.5 cursor-pointer"
+                className="flex items-center gap-2 sm:gap-2.5 cursor-pointer"
                 onClick={handleReset}
               >
-                <Logo className="w-8 h-8" />
-                <h1 className="text-base font-semibold tracking-tight text-gray-900 dark:text-white">
+                <Logo className="w-7 h-7 sm:w-8 sm:h-8" />
+                <h1 className="text-sm sm:text-base font-semibold tracking-tight text-gray-900 dark:text-white">
                   Matchpoint
                 </h1>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <button
                   onClick={toggleTheme}
-                  className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  className="p-1.5 sm:p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
-                  {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+                  {isDarkMode ? <SunIcon className="w-4 h-4 sm:w-5 sm:h-5" /> : <MoonIcon className="w-4 h-4 sm:w-5 sm:h-5" />}
                 </button>
-                <div className="w-px h-5 bg-gray-200 dark:bg-white/10" />
+                <div className="w-px h-4 sm:h-5 bg-gray-200 dark:bg-white/10" />
                 {user ? (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <span className="text-sm text-gray-600 dark:text-gray-400 hidden md:inline">
                       {user.email}
                     </span>
                     <button
                       onClick={handleSignOut}
-                      className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white hover:opacity-70 transition-opacity"
+                      className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-gray-900 dark:text-white hover:opacity-70 transition-opacity"
                     >
                       <ArrowRightOnRectangleIcon className="w-4 h-4" />
                       <span className="hidden sm:inline">Logout</span>
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <button
                       onClick={() => setShowAuthModal(true)}
-                      className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                      className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                     >
                       Login
                     </button>
                     <button
                       onClick={() => setShowAuthModal(true)}
-                      className="text-sm font-semibold px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-sm hover:shadow-md"
+                      className="text-xs sm:text-sm font-semibold px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-sm hover:shadow-md"
                     >
                       Sign up
                     </button>
@@ -322,14 +322,14 @@ const App: React.FC = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: smoothEase }}
-                className="flex-grow flex flex-col items-center justify-center text-center py-16"
+                className="flex-grow flex flex-col items-center justify-center text-center px-2 py-8 sm:py-16"
               >
                 {/* Headline */}
                 <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.6 }}
-                  className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white tracking-tight leading-[1.1] mb-6"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white tracking-tight leading-[1.1] mb-4 sm:mb-6"
                 >
                   Get matched to
                   <br />
@@ -344,7 +344,7 @@ const App: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl mb-12"
+                  className="text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl mb-8 sm:mb-12 px-2"
                 >
                   Upload your resume. We read it deeply and return a small, accurate set of early-stage startups where you genuinely fit.
                 </motion.p>
@@ -354,7 +354,7 @@ const App: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
-                  className="w-full max-w-md p-6 bg-white/80 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 shadow-xl shadow-orange-500/10"
+                  className="w-full max-w-md p-4 sm:p-6 bg-white/80 dark:bg-white/5 backdrop-blur-sm rounded-2xl border border-gray-200 dark:border-white/10 shadow-xl shadow-orange-500/10"
                 >
                   <FileUpload onFileSelect={handleFileSelect} />
                 </motion.div>

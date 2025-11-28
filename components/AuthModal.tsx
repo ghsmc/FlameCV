@@ -111,8 +111,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSignIn,
           </button>
 
           {/* Header */}
-          <div className="p-8 pb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="p-6 sm:p-8 pb-4 sm:pb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
               {mode === 'signin' ? 'Welcome back' : 'Create account'}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -123,7 +123,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSignIn,
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="px-8 pb-6 space-y-5">
+          <form onSubmit={handleSubmit} className="px-6 sm:px-8 pb-6 space-y-4 sm:space-y-5">
             {/* Error Message */}
             <AnimatePresence>
               {error && (

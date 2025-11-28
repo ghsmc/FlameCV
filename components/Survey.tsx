@@ -210,14 +210,14 @@ export const Survey: React.FC<SurveyProps> = ({ onComplete, onSkip }) => {
   const progress = ((currentStep) / QUESTIONS.length) * 100;
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-6 py-8">
+    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       
       {/* Progress Bar */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: smoothEase }}
-        className="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full mb-12 overflow-hidden"
+        className="w-full h-1 bg-gray-100 dark:bg-white/10 rounded-full mb-8 sm:mb-12 overflow-hidden"
       >
         <motion.div 
           className="h-full bg-orange-500"
@@ -235,11 +235,11 @@ export const Survey: React.FC<SurveyProps> = ({ onComplete, onSkip }) => {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.4, ease: smoothEase }}
         >
-          <div className="mb-8">
-            <span className="text-xs font-medium tracking-wider text-orange-600 dark:text-orange-400 uppercase mb-3 block">
+          <div className="mb-6 sm:mb-8">
+            <span className="text-xs font-medium tracking-wider text-orange-600 dark:text-orange-400 uppercase mb-2 sm:mb-3 block">
               Step {currentStep + 1} of {QUESTIONS.length}
             </span>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
               {currentQuestion.title}
             </h2>
           </div>
@@ -256,7 +256,7 @@ export const Survey: React.FC<SurveyProps> = ({ onComplete, onSkip }) => {
                   }}
                   onFocus={() => setShowSuggestions(true)}
                   placeholder={currentQuestion.placeholder}
-                  className="w-full bg-transparent border-b-2 border-gray-200 dark:border-gray-700 text-xl py-3 text-gray-900 dark:text-white focus:border-orange-500 focus:outline-none transition-colors duration-200 placeholder:text-gray-300 dark:placeholder:text-gray-600"
+                  className="w-full bg-transparent border-b-2 border-gray-200 dark:border-gray-700 text-lg sm:text-xl py-2.5 sm:py-3 text-gray-900 dark:text-white focus:border-orange-500 focus:outline-none transition-colors duration-200 placeholder:text-gray-300 dark:placeholder:text-gray-600"
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && inputValue && handleNext()}
                 />

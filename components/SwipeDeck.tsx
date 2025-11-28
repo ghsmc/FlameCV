@@ -28,7 +28,7 @@ const getTierColor = (tier: string) => {
     case 'Reach':
       return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
     case 'Target':
-      return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
     case 'Safety':
       return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
     default:
@@ -88,8 +88,8 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({ companies, onClose, onComp
         className="fixed inset-0 z-50 bg-white dark:bg-[#020617] flex flex-col items-center justify-center p-6"
       >
         <div className="text-center max-w-md">
-          <div className="w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckIcon className="w-10 h-10 text-green-600 dark:text-green-400" />
+          <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckIcon className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
             All done!
@@ -130,12 +130,12 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({ companies, onClose, onComp
       </div>
 
       {/* Card Stack */}
-      <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
         {/* Background cards for depth effect */}
         {companies.slice(currentIndex + 1, currentIndex + 3).map((_, i) => (
           <div
             key={i}
-            className="absolute w-full max-w-md aspect-[3/4] bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-white/10 shadow-lg"
+            className="absolute w-[calc(100%-2rem)] sm:w-full max-w-md aspect-[3/4] bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-white/10 shadow-lg"
             style={{
               transform: `scale(${0.95 - i * 0.05}) translateY(${(i + 1) * 15}px)`,
               zIndex: -i - 1,
@@ -167,7 +167,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({ companies, onClose, onComp
               rotate: direction === 'left' ? -20 : 20,
             }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
+            className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl sm:rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
           >
             {/* Swipe Indicators */}
             <div className="absolute inset-0 pointer-events-none z-10">
@@ -178,7 +178,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({ companies, onClose, onComp
                 NOPE
               </motion.div>
               <motion.div
-                className="absolute top-8 right-8 px-4 py-2 bg-green-500 text-white font-bold text-xl rounded-lg border-4 border-green-600 transform rotate-12"
+                className="absolute top-8 right-8 px-4 py-2 bg-emerald-500 text-white font-bold text-xl rounded-lg border-4 border-emerald-600 transform rotate-12"
                 animate={{ opacity: dragX > 50 ? Math.min(1, dragX / 100) : 0 }}
               >
                 YES!
@@ -186,22 +186,22 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({ companies, onClose, onComp
             </div>
 
             {/* Card Content */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {/* Logo & Name */}
-              <div className="flex items-start gap-4 mb-6">
+              <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <img
                   src={`https://img.logo.dev/${currentCompany.domain}?token=pk_c2nKhfMyRIOeCjrk-6-RRw`}
                   alt={`${currentCompany.name} logo`}
-                  className="w-20 h-20 rounded-2xl object-contain bg-white border border-gray-100 dark:border-gray-800 shadow-sm"
+                  className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl object-contain bg-white border border-gray-100 dark:border-gray-800 shadow-sm"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentCompany.name)}&background=f3f4f6&color=6b7280&size=80`;
                   }}
                 />
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1.5 sm:mb-2">
                     {currentCompany.name}
                   </h3>
-                  <span className={`inline-flex text-sm font-semibold px-3 py-1 rounded-full ${getTierColor(currentCompany.tier)}`}>
+                  <span className={`inline-flex text-xs sm:text-sm font-semibold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full ${getTierColor(currentCompany.tier)}`}>
                     {currentCompany.tier}
                   </span>
                 </div>
@@ -209,7 +209,7 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({ companies, onClose, onComp
 
               {/* Description */}
               {currentCompany.description && (
-                <p className="text-gray-600 dark:text-gray-400 text-lg leading-relaxed mb-6">
+                <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg leading-relaxed mb-4 sm:mb-6 line-clamp-3 sm:line-clamp-none">
                   {currentCompany.description}
                 </p>
               )}
@@ -241,29 +241,29 @@ export const SwipeDeck: React.FC<SwipeDeckProps> = ({ companies, onClose, onComp
       </div>
 
       {/* Action Buttons */}
-      <div className="p-6 flex items-center justify-center gap-8">
+      <div className="p-4 sm:p-6 flex items-center justify-center gap-6 sm:gap-8">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => handleSwipe('left')}
-          className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 shadow-lg hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors"
+          className="w-14 h-14 sm:w-16 sm:h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 shadow-lg hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors"
         >
-          <XMarkIcon className="w-8 h-8" />
+          <XMarkIcon className="w-6 h-6 sm:w-8 sm:h-8" />
         </motion.button>
 
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => handleSwipe('right')}
-          className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-green-600 transition-colors"
+          className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-emerald-600 transition-colors"
         >
-          <CheckIcon className="w-10 h-10" />
+          <CheckIcon className="w-8 h-8 sm:w-10 sm:h-10" />
         </motion.button>
       </div>
 
       {/* Instructions */}
-      <div className="pb-6 text-center text-sm text-gray-400 dark:text-gray-500">
-        Swipe right or tap <span className="text-green-500">Yes</span> to view careers &bull; Swipe left or tap <span className="text-red-500">No</span> to skip
+      <div className="pb-4 sm:pb-6 text-center text-xs sm:text-sm text-gray-400 dark:text-gray-500 px-4">
+        Swipe right or tap <span className="text-emerald-500">Yes</span> to view careers &bull; Swipe left or tap <span className="text-red-500">No</span> to skip
       </div>
     </motion.div>
   );

@@ -77,19 +77,19 @@ const CompanyCard: React.FC<{
       )}
 
       {/* Main Content */}
-      <div className="p-5">
+      <div className="p-4 sm:p-5">
         {/* Header: Logo + Name + Industry */}
-        <div className="flex items-start gap-4 mb-4">
+        <div className="flex items-start gap-3 sm:gap-4 mb-4">
           <img 
             src={`https://img.logo.dev/${company.domain}?token=pk_c2nKhfMyRIOeCjrk-6-RRw`}
             alt={`${company.name} logo`}
-            className="w-14 h-14 rounded-xl object-contain bg-white border border-gray-100 dark:border-gray-800 shrink-0 shadow-sm"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-contain bg-white border border-gray-100 dark:border-gray-800 shrink-0 shadow-sm"
             onError={(e) => {
               (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=f3f4f6&color=6b7280&size=56`;
             }}
           />
           <div className="flex-1 min-w-0">
-            <h5 className="font-bold text-gray-900 dark:text-white text-base truncate mb-1">
+            <h5 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate mb-1">
               {company.name}
             </h5>
             {company.industry && (
@@ -166,7 +166,7 @@ const CompanyCard: React.FC<{
             {company.hiringRoles.map((role, i) => (
               <span 
                 key={i} 
-                className="text-xs font-medium px-2 py-1 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-800/30"
+                className="text-xs font-medium px-2 py-1 rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 border border-violet-100 dark:border-violet-800/30"
               >
                 Hiring: {role}
               </span>
@@ -219,7 +219,7 @@ const CompanyCard: React.FC<{
           </button>
           <button
             onClick={handleYes}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-green-500 rounded-xl hover:bg-green-600 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors border border-emerald-200 dark:border-emerald-800/30"
           >
             <CheckIcon className="w-4 h-4" />
             Yes
@@ -380,20 +380,20 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
         )}
 
         {/* Summary Stats Bar */}
-        <div className="flex items-center justify-between py-4 px-6 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
-          <div className="flex items-center gap-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4 px-4 sm:px-6 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
+          <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{activeCompanies.length}</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{activeCompanies.length}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Matches</div>
             </div>
-            <div className="w-px h-8 bg-gray-200 dark:bg-white/10" />
-            <div className="flex items-center gap-4 text-sm">
+            <div className="w-px h-8 bg-gray-200 dark:bg-white/10 hidden sm:block" />
+            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm flex-wrap">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-purple-500" />
                 <span className="text-gray-600 dark:text-gray-400">{reach.length} Reach</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
                 <span className="text-gray-600 dark:text-gray-400">{target.length} Target</span>
               </span>
               <span className="flex items-center gap-1.5">
@@ -404,7 +404,7 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
           </div>
           <button
             onClick={() => setShowSwipeMode(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-semibold rounded-xl hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg"
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs sm:text-sm font-semibold rounded-xl hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
           >
             <HandRaisedIcon className="w-4 h-4" />
             Swipe Mode
@@ -427,8 +427,8 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
             subtitle="Great mutual fit — strong chance of success"
             icon={<ArrowTrendingUpIcon className="w-6 h-6" />}
             companies={target}
-            colorClass="text-green-600 dark:text-green-400"
-            bgClass="bg-green-50 dark:bg-green-900/20"
+            colorClass="text-amber-600 dark:text-amber-400"
+            bgClass="bg-amber-50 dark:bg-amber-900/20"
             onCompanyAction={handleCompanyAction}
           />
           <TierSection

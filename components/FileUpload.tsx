@@ -80,7 +80,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
         transition={{ duration: 0.2, ease: smoothEase }}
         className={`
           relative cursor-pointer
-          border-2 border-dashed rounded-2xl p-12 transition-all duration-200
+          border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-all duration-200
           flex flex-col items-center justify-center text-center
           border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-white/[0.03] backdrop-blur-sm
           hover:border-gray-300 dark:hover:border-gray-700 hover:bg-white/95 dark:hover:bg-white/[0.05]
@@ -94,29 +94,29 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect }) => {
         />
         
         <div className={`
-          mb-6 p-4 rounded-xl transition-all duration-200
+          mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl transition-all duration-200
           ${isDragging 
             ? 'bg-orange-100 dark:bg-orange-900/20' 
             : 'bg-gray-100 dark:bg-white/5'
           }
         `}>
-          <ArrowUpTrayIcon className={`w-6 h-6 transition-colors duration-200 ${
+          <ArrowUpTrayIcon className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-200 ${
             isDragging 
               ? 'text-orange-600 dark:text-orange-400' 
               : 'text-gray-500 dark:text-gray-400'
           }`} />
         </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1.5 sm:mb-2">
           {isDragging ? "Drop to upload" : "Upload your resume"}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xs">
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4 sm:mb-6 max-w-xs">
           {isDragging ? "Release to upload your file" : "Drag and drop your PDF, or click to browse"}
         </p>
 
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-3 py-1.5 rounded-lg">
-            <DocumentTextIcon className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg">
+            <DocumentTextIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             PDF, TXT, IMG
           </span>
           <span className="text-xs text-gray-400 dark:text-gray-500">Max 10MB</span>
