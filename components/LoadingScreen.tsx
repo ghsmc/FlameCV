@@ -76,9 +76,14 @@ const PHASE_CONFIG: Record<string, { label: string; messages: string[] }> = {
   },
 };
 
-// Shimmer effect component
+// Shimmer effect component - confined to text/content only
 const Shimmer: React.FC = () => (
-  <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+  <motion.div
+    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"
+    animate={{ x: ['-100%', '100%'] }}
+    transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 0.5 }}
+    style={{ width: '50%' }}
+  />
 );
 
 // Smooth easing curve for professional feel
@@ -143,7 +148,7 @@ const Stars: React.FC = () => {
   );
 };
 
-// Single thinking step card
+// Single thinking step card - clean single-line format
 const ThinkingCard: React.FC<{
   step: ThinkingStep;
   isLatest: boolean;
@@ -157,109 +162,68 @@ const ThinkingCard: React.FC<{
   const label = config.label;
   
   return (
-    <div className="relative pl-8 pb-2">
-      {/* Vertical Connecting Line */}
-      {!isLast && (
-        <div className="absolute left-[11px] top-8 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
-      )}
-      
-      {/* Status Dot */}
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ 
+        duration: 0.3, 
+        delay: index * 0.05,
+        ease: [0.25, 0.46, 0.45, 0.94] 
+      }}
+      className="relative"
+    >
       <div className={`
-        absolute left-0 top-4 w-6 h-6 rounded-full border-2 flex items-center justify-center z-10 transition-colors duration-300
+        flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300
         ${isLatest 
-          ? 'bg-white dark:bg-gray-900 border-orange-500' 
-          : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+          ? 'bg-orange-50 dark:bg-orange-900/20' 
+          : 'bg-transparent'
         }
       `}>
-        {isLatest && (
-          <motion.div
-            className="w-2 h-2 rounded-full bg-orange-500"
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
-        )}
-        {!isLatest && <div className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" />}
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ 
-          duration: 0.4, 
-          delay: index * 0.1,
-          ease: [0.25, 0.46, 0.45, 0.94] 
-        }}
-        className={`
-          relative overflow-hidden rounded-xl border transition-all duration-300
+        {/* Status Dot */}
+        <div className={`
+          w-2 h-2 rounded-full flex-shrink-0 transition-all duration-300
           ${isLatest 
-            ? 'bg-white/80 dark:bg-white/[0.05] border-orange-200/50 dark:border-orange-500/30 shadow-sm' 
-            : 'bg-transparent border-transparent'
+            ? 'bg-orange-500' 
+            : 'bg-gray-300 dark:bg-gray-600'
           }
-        `}
-      >
-        {isLatest && <Shimmer />}
-        
-        {/* Header */}
-        <button
-          onClick={onToggle}
-          className={`w-full px-4 py-3 flex items-center gap-3 text-left relative z-10 rounded-xl ${!isLatest && 'hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors'}`}
-        >
-          {/* Label */}
-          <div className="flex-1 min-w-0">
-            <span className={`
-              font-medium transition-colors block text-sm
-              ${isLatest 
-                ? 'text-orange-900 dark:text-orange-200' 
-                : 'text-gray-500 dark:text-gray-400'
-                }
-            `}>
-              {label}
-              {isLatest && <ThinkingDots />}
-            </span>
-          </div>
-          
-          {/* Expand indicator */}
-          {step.content && !isLatest && (
-            <motion.svg 
-              className="w-4 h-4 text-gray-400"
-              animate={{ rotate: isExpanded ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </motion.svg>
-          )}
-        </button>
-
-        {/* Expandable content */}
-        <AnimatePresence>
-          {isExpanded && step.content && (
+        `}>
+          {isLatest && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="overflow-hidden"
-            >
-              <div className="px-4 pb-4 relative z-10">
-                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-mono text-xs">
-                  {step.content}
-                  {isLatest && (
-                    <motion.span
-                      animate={{ opacity: [0, 1, 0] }}
-                      transition={{ duration: 0.8, repeat: Infinity }}
-                      className="inline-block w-1.5 h-3 bg-orange-500 ml-1 align-middle"
-                    />
-                  )}
-                </p>
-              </div>
-            </motion.div>
+              className="w-full h-full rounded-full bg-orange-500"
+              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
           )}
-        </AnimatePresence>
-      </motion.div>
-    </div>
+        </div>
+        
+        {/* Label and message on same line */}
+        <div className="flex-1 min-w-0 flex items-baseline gap-2">
+          <span className={`
+            font-medium text-sm flex-shrink-0
+            ${isLatest 
+              ? 'text-orange-600 dark:text-orange-400' 
+              : 'text-gray-500 dark:text-gray-500'
+            }
+          `}>
+            {label}
+          </span>
+          {isLatest && (
+            <motion.span
+              key={currentMessage}
+              initial={{ opacity: 0, y: 3 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="text-xs text-gray-600 dark:text-gray-400 truncate"
+            >
+              {currentMessage}
+            </motion.span>
+          )}
+        </div>
+        
+        {/* Thinking dots for latest only */}
+        {isLatest && <ThinkingDots />}
+      </div>
+    </motion.div>
   );
 };
 
@@ -480,8 +444,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
               </div>
             </div>
 
-            {/* Thinking steps */}
-            <div className="space-y-3 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
+            {/* Thinking steps - clean list without scrollbar */}
+            <div className="space-y-1">
               {thinkingSteps.map((step, index) => (
                 <ThinkingCard
                   key={`${step.phase}-${index}`}
