@@ -247,7 +247,7 @@ const App: React.FC = () => {
         }}
         transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <div className="max-w-4xl mx-auto px-6 w-full flex flex-col flex-1">
+        <div className="max-w-5xl mx-auto px-6 w-full flex flex-col flex-1">
 
         {/* Header - Floating Navbar */}
         <motion.header
