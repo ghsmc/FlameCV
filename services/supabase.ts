@@ -53,6 +53,8 @@ export const uploadResumeFile = async (
     const fileExt = file.name.split('.').pop();
     const filePath = `${userId}/${resumeId}.${fileExt}`;
 
+    console.log('Attempting storage upload:', { filePath, fileSize: file.size, fileType: file.type });
+
     const { data, error } = await supabase.storage
       .from(RESUMES_BUCKET)
       .upload(filePath, file, {
@@ -61,18 +63,22 @@ export const uploadResumeFile = async (
       });
 
     if (error) {
-      console.error('Error uploading file:', error);
+      console.error('Storage upload error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       return null;
     }
 
-    // Get public URL
+    console.log('Storage upload success:', data);
+
+    // Get public URL (even for private buckets, this gives the URL path)
     const { data: { publicUrl } } = supabase.storage
       .from(RESUMES_BUCKET)
       .getPublicUrl(filePath);
 
+    console.log('Generated file URL:', publicUrl);
     return publicUrl;
   } catch (err) {
-    console.error('Error uploading file:', err);
+    console.error('Exception during file upload:', err);
     return null;
   }
 };
@@ -176,9 +182,11 @@ export const saveResume = async (
 
     // If originalFile and userId are provided, upload to storage
     if (originalFile && userId) {
+      console.log('Uploading to storage:', { userId, resumeId: data.id, fileName: originalFile.name });
       const fileUrl = await uploadResumeFile(originalFile, userId, data.id);
       
       if (fileUrl) {
+        console.log('Storage upload successful:', fileUrl);
         // Update record with file URL
         await supabase
           .from(RESUMES_TABLE)
@@ -187,8 +195,16 @@ export const saveResume = async (
             file_size: originalFile.size 
           })
           .eq('id', data.id);
+      } else {
+        console.error('Storage upload failed, falling back to base64');
+        // Fallback: Store base64 in DB
+        await supabase
+          .from(RESUMES_TABLE)
+          .update({ file_data: file })
+          .eq('id', data.id);
       }
     } else {
+      console.log('No originalFile or userId, using legacy base64 storage');
       // Fallback: Store base64 in DB (legacy support)
       await supabase
         .from(RESUMES_TABLE)
