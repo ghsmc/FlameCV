@@ -11,6 +11,7 @@ export interface ThinkingStep {
 interface LoadingScreenProps {
   thinkingSteps?: ThinkingStep[];
   showThinking?: boolean;
+  sidebarOpen?: boolean;
 }
 
 // Section configuration matching the AI Reasoning view
@@ -71,7 +72,7 @@ const ThinkingDots: React.FC = () => (
 );
 
 // Typewriter effect for streaming content
-const TypewriterText: React.FC<{ text: string; speed?: number }> = ({ text, speed = 15 }) => {
+const TypewriterText: React.FC<{ text: string; speed?: number; onComplete?: () => void }> = ({ text, speed = 8, onComplete }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
 
@@ -87,11 +88,15 @@ const TypewriterText: React.FC<{ text: string; speed?: number }> = ({ text, spee
       } else {
         setIsComplete(true);
         clearInterval(interval);
+        // Notify parent after a short delay
+        if (onComplete) {
+          setTimeout(onComplete, 800);
+        }
       }
     }, speed);
 
     return () => clearInterval(interval);
-  }, [text, speed]);
+  }, [text, speed, onComplete]);
 
   return (
     <span>
@@ -116,7 +121,8 @@ const ReasoningSection: React.FC<{
   isComplete: boolean;
   isExpanded: boolean;
   onToggle: () => void;
-}> = ({ config, step, index, isActive, isComplete, isExpanded, onToggle }) => {
+  onStreamComplete?: () => void;
+}> = ({ config, step, index, isActive, isComplete, isExpanded, onToggle, onStreamComplete }) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -169,7 +175,7 @@ const ReasoningSection: React.FC<{
             </div>
           ) : (
             <span className={`font-medium text-sm sm:text-base ${
-              isComplete ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'
+              isComplete ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'
             }`}>
               {config.title}
             </span>
@@ -211,9 +217,9 @@ const ReasoningSection: React.FC<{
           >
             <div ref={contentRef} className="px-4 pb-4">
               <div className="pl-9">
-                <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
+                <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                   {isActive ? (
-                    <TypewriterText text={step.content} speed={8} />
+                    <TypewriterText text={step.content} speed={5} onComplete={onStreamComplete} />
                   ) : (
                     step.content
                   )}
@@ -269,10 +275,12 @@ const Stars: React.FC = () => {
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({ 
   thinkingSteps = [],
-  showThinking = false
+  showThinking = false,
+  sidebarOpen = false
 }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [completedPhases, setCompletedPhases] = useState<Set<string>>(new Set());
+  const [streamingComplete, setStreamingComplete] = useState<Set<string>>(new Set());
 
   // Get the step data for each phase
   const getStepForPhase = (phase: string) => {
@@ -297,38 +305,35 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
       
       setCompletedPhases(newCompleted);
       
-      // Auto-expand the active section
-      setExpandedSection(activePhase);
-    }
-  }, [activePhase]);
-
-  // When a phase completes, collapse it after a delay
-  useEffect(() => {
-    if (completedPhases.size > 0) {
-      const lastCompleted = Array.from(completedPhases).pop();
-      if (lastCompleted && expandedSection === lastCompleted) {
-        // Keep expanded for a moment, then collapse
-        const timer = setTimeout(() => {
-          if (activePhase && activePhase !== lastCompleted) {
-            setExpandedSection(activePhase);
-          }
-        }, 500);
-        return () => clearTimeout(timer);
+      // Auto-expand the active section if streaming hasn't completed for it yet
+      if (!streamingComplete.has(activePhase)) {
+        setExpandedSection(activePhase);
       }
     }
-  }, [completedPhases, activePhase, expandedSection]);
+  }, [activePhase, streamingComplete]);
+
+  // Handle when streaming completes for a section
+  const handleStreamComplete = (phase: string) => {
+    setStreamingComplete(prev => new Set(prev).add(phase));
+    // Collapse the section after streaming completes
+    setExpandedSection(null);
+  };
 
   // Calculate progress for background animation
   const progress = Math.min(thinkingSteps.length / 6, 1);
   const isNight = progress > 0.6;
-  const rotation = progress * 180;
+  const rotation = progress * 180; 
 
   // Check if we're in the searching phase
   const isSearching = thinkingSteps.some(s => s.phase === 'searching' || s.phase === 'structuring');
 
   if (showThinking && thinkingSteps.length > 0) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden">
+      <motion.div 
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
+        animate={{ paddingLeft: sidebarOpen ? '280px' : '0px' }}
+        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
         {/* Animated Landscape Background */}
         <motion.div 
           className="absolute inset-0 z-0"
@@ -362,75 +367,75 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
           >
             {/* SUN */}
             <div className="absolute top-[15%] left-[25%] -translate-x-1/2 -translate-y-1/2">
-              <div className="relative w-32 h-32 sm:w-48 sm:h-48">
-                <div className="absolute inset-0 rounded-full bg-orange-400 blur-3xl opacity-60" />
-                <div className="absolute inset-4 rounded-full bg-orange-300 blur-2xl opacity-80" />
-                <div className="absolute inset-8 rounded-full bg-orange-100 blur-xl" />
-                <div className="absolute inset-10 rounded-full bg-white shadow-[0_0_100px_rgba(251,146,60,0.8)]" />
-              </div>
+               <div className="relative w-32 h-32 sm:w-48 sm:h-48">
+                 <div className="absolute inset-0 rounded-full bg-orange-400 blur-3xl opacity-60" />
+                 <div className="absolute inset-4 rounded-full bg-orange-300 blur-2xl opacity-80" />
+                 <div className="absolute inset-8 rounded-full bg-orange-100 blur-xl" />
+                 <div className="absolute inset-10 rounded-full bg-white shadow-[0_0_100px_rgba(251,146,60,0.8)]" />
+               </div>
             </div>
 
             {/* MOON */}
             <div className="absolute bottom-[15%] right-[25%] -translate-x-1/2 -translate-y-1/2 rotate-180">
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32">
-                <div className="absolute inset-0 rounded-full bg-slate-200 blur-xl opacity-20" />
-                <div className="absolute inset-2 rounded-full bg-slate-100 blur-md opacity-90" />
-                <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-slate-300/50 rounded-full blur-[1px]" />
-                <div className="absolute bottom-1/3 right-1/4 w-6 h-6 bg-slate-300/40 rounded-full blur-[1px]" />
-                <div className="absolute inset-0 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.4)]" />
-              </div>
+               <div className="relative w-24 h-24 sm:w-32 sm:h-32">
+                 <div className="absolute inset-0 rounded-full bg-slate-200 blur-xl opacity-20" />
+                 <div className="absolute inset-2 rounded-full bg-slate-100 blur-md opacity-90" />
+                 <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-slate-300/50 rounded-full blur-[1px]" />
+                 <div className="absolute bottom-1/3 right-1/4 w-6 h-6 bg-slate-300/40 rounded-full blur-[1px]" />
+                 <div className="absolute inset-0 rounded-full shadow-[0_0_50px_rgba(255,255,255,0.4)]" />
+               </div>
             </div>
           </motion.div>
 
           {/* Mountains */}
           <div className="absolute bottom-0 left-0 right-0 h-full pointer-events-none z-10">
-            <motion.div 
-              className="absolute bottom-0 left-0 right-0 h-[45%]"
-              animate={{
-                filter: isNight 
-                  ? 'brightness(0.2) contrast(1.1) hue-rotate(-15deg)' 
-                  : progress > 0.4 
-                    ? 'brightness(0.6) sepia(0.4) hue-rotate(-10deg)' 
-                    : 'brightness(1) contrast(1)'
-              }}
-              transition={{ duration: 2 }}
-              style={{
-                background: 'linear-gradient(180deg, #fdba74 0%, #f97316 100%)',
-                clipPath: 'polygon(0% 100%, 0% 40%, 15% 20%, 30% 35%, 45% 15%, 60% 30%, 75% 10%, 90% 25%, 100% 20%, 100% 100%)',
-              }}
-            />
-            
-            <motion.div 
-              className="absolute bottom-0 left-0 right-0 h-[35%]"
-              animate={{
-                filter: isNight 
-                  ? 'brightness(0.15) contrast(1.1) hue-rotate(-15deg)' 
-                  : progress > 0.4 
-                    ? 'brightness(0.5) sepia(0.5) hue-rotate(-15deg)' 
-                    : 'brightness(1) contrast(1)'
-              }}
-              transition={{ duration: 2 }}
-              style={{
-                background: 'linear-gradient(180deg, #fb923c 0%, #ea580c 100%)',
-                clipPath: 'polygon(0% 100%, 0% 60%, 20% 35%, 35% 55%, 50% 30%, 65% 45%, 80% 25%, 100% 40%, 100% 100%)',
-              }}
-            />
-            
-            <motion.div 
-              className="absolute bottom-0 left-0 right-0 h-[25%]"
-              animate={{
-                filter: isNight 
-                  ? 'brightness(0.1) contrast(1.2) hue-rotate(-20deg)' 
-                  : progress > 0.4 
-                    ? 'brightness(0.4) sepia(0.6) hue-rotate(-20deg)' 
-                    : 'brightness(1) contrast(1)'
-              }}
-              transition={{ duration: 2 }}
-              style={{
-                background: 'linear-gradient(180deg, #f97316 0%, #dc2626 100%)',
-                clipPath: 'polygon(0% 100%, 0% 75%, 25% 55%, 50% 70%, 75% 50%, 100% 65%, 100% 100%)',
-              }}
-            />
+             <motion.div 
+               className="absolute bottom-0 left-0 right-0 h-[45%]"
+               animate={{
+                 filter: isNight 
+                   ? 'brightness(0.2) contrast(1.1) hue-rotate(-15deg)' 
+                   : progress > 0.4 
+                     ? 'brightness(0.6) sepia(0.4) hue-rotate(-10deg)' 
+                     : 'brightness(1) contrast(1)'
+               }}
+               transition={{ duration: 2 }}
+               style={{
+                 background: 'linear-gradient(180deg, #fdba74 0%, #f97316 100%)',
+                 clipPath: 'polygon(0% 100%, 0% 40%, 15% 20%, 30% 35%, 45% 15%, 60% 30%, 75% 10%, 90% 25%, 100% 20%, 100% 100%)',
+               }}
+             />
+             
+             <motion.div 
+               className="absolute bottom-0 left-0 right-0 h-[35%]"
+               animate={{
+                 filter: isNight 
+                   ? 'brightness(0.15) contrast(1.1) hue-rotate(-15deg)' 
+                   : progress > 0.4 
+                     ? 'brightness(0.5) sepia(0.5) hue-rotate(-15deg)' 
+                     : 'brightness(1) contrast(1)'
+               }}
+               transition={{ duration: 2 }}
+               style={{
+                 background: 'linear-gradient(180deg, #fb923c 0%, #ea580c 100%)',
+                 clipPath: 'polygon(0% 100%, 0% 60%, 20% 35%, 35% 55%, 50% 30%, 65% 45%, 80% 25%, 100% 40%, 100% 100%)',
+               }}
+             />
+             
+             <motion.div 
+               className="absolute bottom-0 left-0 right-0 h-[25%]"
+               animate={{
+                 filter: isNight 
+                   ? 'brightness(0.1) contrast(1.2) hue-rotate(-20deg)' 
+                   : progress > 0.4 
+                     ? 'brightness(0.4) sepia(0.6) hue-rotate(-20deg)' 
+                     : 'brightness(1) contrast(1)'
+               }}
+               transition={{ duration: 2 }}
+               style={{
+                 background: 'linear-gradient(180deg, #f97316 0%, #dc2626 100%)',
+                 clipPath: 'polygon(0% 100%, 0% 75%, 25% 55%, 50% 70%, 75% 50%, 100% 65%, 100% 100%)',
+               }}
+             />
           </div>
         </motion.div>
 
@@ -484,11 +489,12 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                     step={step}
                     index={index}
                     isActive={isActive}
-                    isComplete={isComplete}
+                    isComplete={isComplete || streamingComplete.has(config.phase)}
                     isExpanded={expandedSection === config.phase}
                     onToggle={() => setExpandedSection(
                       expandedSection === config.phase ? null : config.phase
                     )}
+                    onStreamComplete={() => handleStreamComplete(config.phase)}
                   />
                 );
               })}
@@ -529,7 +535,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
             )}
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 

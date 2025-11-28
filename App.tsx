@@ -243,14 +243,15 @@ const App: React.FC = () => {
 
 
       {/* Main Layout Container */}
-      <motion.div 
+      <motion.div
         className="relative z-10 min-h-screen flex flex-col transition-all duration-200"
-        animate={{ 
+        animate={{
           paddingLeft: sidebarOpen ? '280px' : '0px',
         }}
         transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+        style={{ paddingLeft: sidebarOpen ? undefined : '0px' }} // Override on mobile via CSS
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 w-full flex flex-col flex-1">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 w-full flex flex-col flex-1">
 
         {/* Header - Floating Navbar */}
         <motion.header
@@ -391,6 +392,7 @@ const App: React.FC = () => {
                 <LoadingScreen
                   thinkingSteps={thinkingSteps}
                   showThinking={thinkingSteps.length > 0}
+                  sidebarOpen={sidebarOpen}
                 />
               </motion.div>
             )}
@@ -427,7 +429,7 @@ const App: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.6, ease: smoothEase }}
-                className="w-full max-w-5xl mx-auto py-12"
+                className="w-full max-w-5xl mx-auto py-6 sm:py-12"
               >
                 <RoastResult
                   data={matchData}

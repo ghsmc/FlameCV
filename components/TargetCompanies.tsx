@@ -311,63 +311,63 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
         
         {/* Personalized Message Hero */}
         {careerAdvice && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 bg-gradient-to-br from-white to-gray-50 dark:from-white/[0.03] dark:to-white/[0.01]"
+            className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-gray-200 dark:border-white/10 bg-gradient-to-br from-white to-gray-50 dark:from-white/[0.03] dark:to-white/[0.01]"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-red-500 to-purple-600"></div>
-            
-            <div className="p-8 md:p-10">
+
+            <div className="p-4 sm:p-6 md:p-10">
               {/* Header */}
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
-                  <SparklesIcon className="w-6 h-6 text-white" />
+              <div className="flex items-center gap-3 mb-4 sm:mb-8">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg flex-shrink-0">
+                  <SparklesIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
                     Your Profile Analysis
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                     Personalized career insights
                   </p>
                 </div>
               </div>
 
               {/* Reality Check Quote */}
-              <blockquote className="text-xl md:text-2xl font-medium leading-relaxed text-gray-800 dark:text-gray-100 mb-10 pl-6 border-l-4 border-orange-500">
+              <blockquote className="text-base sm:text-xl md:text-2xl font-medium leading-relaxed text-gray-800 dark:text-gray-100 mb-6 sm:mb-10 pl-4 sm:pl-6 border-l-4 border-orange-500">
                 {careerAdvice.realityCheck}
               </blockquote>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-gray-100 dark:border-white/10">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                    <UserIcon className="w-4 h-4" /> Level
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6 pt-4 sm:pt-8 border-t border-gray-100 dark:border-white/10">
+                <div className="space-y-1 sm:space-y-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <UserIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Level
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                     {careerAdvice.currentLevel}
                   </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                    <CurrencyDollarIcon className="w-4 h-4" /> Market Value
+
+                <div className="space-y-1 sm:space-y-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <CurrencyDollarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Market Value
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                     {careerAdvice.estimatedSalary}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                    <BriefcaseIcon className="w-4 h-4" /> Target Roles
+                <div className="space-y-1 sm:space-y-2 col-span-2 sm:col-span-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    <BriefcaseIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Target Roles
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {careerAdvice.recommendedRoles.slice(0, 3).map((role, i) => (
-                      <span 
-                        key={i} 
-                        className="text-sm font-semibold bg-orange-50 dark:bg-orange-900/20 px-3 py-1.5 rounded-lg text-orange-700 dark:text-orange-300 border border-orange-100 dark:border-orange-800/30"
+                      <span
+                        key={i}
+                        className="text-xs sm:text-sm font-semibold bg-orange-50 dark:bg-orange-900/20 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-orange-700 dark:text-orange-300 border border-orange-100 dark:border-orange-800/30"
                       >
                         {role}
                       </span>
@@ -380,31 +380,31 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
         )}
 
         {/* Summary Stats Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-4 px-4 sm:px-6 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
-          <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
-            <div className="text-center">
-              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{activeCompanies.length}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Matches</div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 py-3 sm:py-4 px-3 sm:px-6 rounded-xl bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
+          <div className="flex items-center gap-3 sm:gap-6 w-full sm:w-auto">
+            <div className="text-center flex-shrink-0">
+              <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">{activeCompanies.length}</div>
+              <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Matches</div>
             </div>
-            <div className="w-px h-8 bg-gray-200 dark:bg-white/10 hidden sm:block" />
-            <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm flex-wrap">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-purple-500" />
+            <div className="w-px h-6 sm:h-8 bg-gray-200 dark:bg-white/10" />
+            <div className="flex items-center gap-2 sm:gap-4 text-[10px] sm:text-sm flex-wrap">
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-purple-500" />
                 <span className="text-gray-600 dark:text-gray-400">{reach.length} Reach</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-500" />
                 <span className="text-gray-600 dark:text-gray-400">{target.length} Target</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500" />
                 <span className="text-gray-600 dark:text-gray-400">{safety.length} Safety</span>
               </span>
             </div>
           </div>
           <button
             onClick={() => setShowSwipeMode(true)}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs sm:text-sm font-semibold rounded-xl hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs sm:text-sm font-semibold rounded-xl hover:from-orange-600 hover:to-red-600 transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
           >
             <HandRaisedIcon className="w-4 h-4" />
             Swipe Mode
