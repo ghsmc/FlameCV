@@ -63,10 +63,13 @@ const App: React.FC = () => {
       if (newUser) {
         // Reload history when user logs in
         loadHistory(newUser.id);
+        // Open sidebar when user logs in
+        setSidebarOpen(true);
       } else {
         // Clear history when user logs out
         setHistory([]);
         setMatchCount(0);
+        setSidebarOpen(false);
       }
     });
 
