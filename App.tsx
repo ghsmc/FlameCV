@@ -211,16 +211,18 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#020617] text-gray-900 dark:text-gray-100 font-sans selection:bg-orange-100 selection:text-orange-900 dark:selection:bg-orange-900/30 dark:selection:text-orange-100 transition-colors duration-300">
       
-      {/* Sidebar */}
-      <Sidebar
-        history={history}
-        onSelect={handleHistorySelect}
-        onClear={handleClearHistory}
-        onNewAnalysis={handleReset}
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-        user={user}
-      />
+      {/* Sidebar - Only show on dashboard/results views, not landing */}
+      {state === AppState.COMPLETE && (
+        <Sidebar
+          history={history}
+          onSelect={handleHistorySelect}
+          onClear={handleClearHistory}
+          onNewAnalysis={handleReset}
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+          user={user}
+        />
+      )}
 
       {/* Portal Transition Overlay */}
       <motion.div className="fixed inset-0 z-[100] flex flex-col pointer-events-none">
@@ -242,7 +244,7 @@ const App: React.FC = () => {
       {/* Main Layout Container */}
       <motion.div 
         className="relative z-10 max-w-4xl mx-auto px-6 min-h-screen flex flex-col"
-        animate={{ marginLeft: sidebarOpen ? '280px' : '0px' }}
+        animate={{ marginLeft: state === AppState.COMPLETE && sidebarOpen ? '280px' : '0px' }}
         transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
 
