@@ -322,7 +322,7 @@ const App: React.FC = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3, ease: smoothEase }}
-                className="flex-grow flex flex-col items-center justify-center text-center pb-40"
+                className="flex-grow flex flex-col items-center justify-center text-center py-16"
               >
                 {/* Headline */}
                 <motion.h1
