@@ -4,11 +4,12 @@ import { FileUpload } from './components/FileUpload';
 import { LoadingScreen, ThinkingStep } from './components/LoadingScreen';
 import { RoastResult } from './components/RoastResult';
 import { Survey } from './components/Survey';
+import { AuthModal } from './components/AuthModal';
 import { AppState, FileData, AnalysisData, HistoryItem, UserPreferences } from './types';
 import { generateRoast } from './services/gemini';
-import { saveResume, getResumes, getResumeCount } from './services/supabase';
+import { saveResume, getResumes, getResumeCount, signIn, signUp, signOut, getCurrentUser, onAuthStateChange, User } from './services/supabase';
 import { Logo } from './components/Logo';
-import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 // Smooth easing curve for professional feel
 const smoothEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -24,6 +25,8 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [thinkingSteps, setThinkingSteps] = useState<ThinkingStep[]>([]);
   const [showContent, setShowContent] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -43,19 +46,49 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Auth state listener
   useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const resumes = await getResumes();
-        setHistory(resumes);
-        const count = await getResumeCount();
-        setMatchCount(count);
-      } catch (e) {
-        console.error("Failed to load history", e);
-      }
+    const loadUser = async () => {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
     };
-    loadHistory();
+
+    loadUser();
+
+    // Subscribe to auth changes
+    const unsubscribe = onAuthStateChange((newUser) => {
+      setUser(newUser);
+      if (newUser) {
+        // Reload history when user logs in
+        loadHistory(newUser.id);
+      } else {
+        // Clear history when user logs out
+        setHistory([]);
+        setMatchCount(0);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
+
+  const loadHistory = async (userId?: string) => {
+    try {
+      const resumes = await getResumes(userId);
+      setHistory(resumes);
+      const count = await getResumeCount(userId);
+      setMatchCount(count);
+    } catch (e) {
+      console.error("Failed to load history", e);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      loadHistory(user.id);
+    }
+  }, [user]);
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;
@@ -71,15 +104,30 @@ const App: React.FC = () => {
 
   const addToHistory = async (file: FileData, data: AnalysisData) => {
     try {
-      const newItem = await saveResume(file, data);
+      const newItem = await saveResume(file, data, user?.id);
       if (newItem) {
         setHistory([newItem, ...history]);
-        const count = await getResumeCount();
+        const count = await getResumeCount(user?.id);
         setMatchCount(count);
       }
     } catch (err) {
       console.error("Error saving to history:", err);
     }
+  };
+
+  const handleSignIn = async (email: string, password: string) => {
+    await signIn(email, password);
+  };
+
+  const handleSignUp = async (email: string, password: string) => {
+    await signUp(email, password);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setUser(null);
+    setHistory([]);
+    setMatchCount(0);
   };
 
   const handleFileSelect = async (file: FileData) => {
@@ -221,9 +269,27 @@ const App: React.FC = () => {
                   {isDarkMode ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
                 </button>
                 <div className="w-px h-5 bg-gray-200 dark:bg-white/10" />
-                <button className="text-sm font-medium text-gray-900 dark:text-white hover:opacity-70 transition-opacity">
-                  Login
-                </button>
+                {user ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600 dark:text-gray-400 hidden sm:inline">
+                      {user.email}
+                    </span>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white hover:opacity-70 transition-opacity"
+                    >
+                      <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                      <span className="hidden sm:inline">Logout</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowAuthModal(true)}
+                    className="text-sm font-medium text-gray-900 dark:text-white hover:opacity-70 transition-opacity"
+                  >
+                    Login
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -355,6 +421,14 @@ const App: React.FC = () => {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSignIn={handleSignIn}
+        onSignUp={handleSignUp}
+      />
     </div>
   );
 };

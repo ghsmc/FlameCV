@@ -234,3 +234,127 @@ export const getResumeCount = async (userId?: string): Promise<number> => {
   }
 };
 
+// ============================================================
+// AUTHENTICATION FUNCTIONS
+// ============================================================
+
+export interface User {
+  id: string;
+  email: string;
+}
+
+/**
+ * Sign up a new user with email and password
+ */
+export const signUp = async (email: string, password: string): Promise<User> => {
+  if (!supabase) {
+    throw new Error('Supabase not initialized');
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data.user) {
+    throw new Error('Failed to create user account');
+  }
+
+  return {
+    id: data.user.id,
+    email: data.user.email || email,
+  };
+};
+
+/**
+ * Sign in an existing user with email and password
+ */
+export const signIn = async (email: string, password: string): Promise<User> => {
+  if (!supabase) {
+    throw new Error('Supabase not initialized');
+  }
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data.user) {
+    throw new Error('Failed to sign in');
+  }
+
+  return {
+    id: data.user.id,
+    email: data.user.email || email,
+  };
+};
+
+/**
+ * Sign out the current user
+ */
+export const signOut = async (): Promise<void> => {
+  if (!supabase) {
+    throw new Error('Supabase not initialized');
+  }
+
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
+/**
+ * Get the current authenticated user
+ */
+export const getCurrentUser = async (): Promise<User | null> => {
+  if (!supabase) {
+    console.warn('Supabase not initialized');
+    return null;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    id: user.id,
+    email: user.email || '',
+  };
+};
+
+/**
+ * Listen for auth state changes
+ */
+export const onAuthStateChange = (callback: (user: User | null) => void) => {
+  if (!supabase) {
+    console.warn('Supabase not initialized');
+    return () => {};
+  }
+
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      callback({
+        id: session.user.id,
+        email: session.user.email || '',
+      });
+    } else {
+      callback(null);
+    }
+  });
+
+  return () => {
+    subscription.unsubscribe();
+  };
+};
+
