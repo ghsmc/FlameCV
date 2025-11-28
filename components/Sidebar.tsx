@@ -212,7 +212,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Toggle Button - Below navbar on mobile, aligned with navbar on desktop */}
       <button
         onClick={onToggle}
-        className={`fixed top-[72px] sm:top-[30px] z-50 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all duration-200 ${
+        className={`fixed top-[72px] sm:top-[30px] z-50 p-2 rounded-lg transition-all duration-200 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sm:bg-transparent sm:dark:bg-transparent sm:backdrop-blur-none hover:bg-gray-100 dark:hover:bg-white/10 shadow-sm sm:shadow-none border border-gray-200/50 dark:border-white/10 sm:border-transparent ${
           isOpen
             ? 'left-[calc(85vw+12px)] sm:left-[292px] max-[639px]:left-[min(calc(85vw+12px),292px)]'
             : 'left-3 sm:left-6'
