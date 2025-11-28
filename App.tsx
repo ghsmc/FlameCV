@@ -106,11 +106,22 @@ const App: React.FC = () => {
 
   const addToHistory = async (file: FileData, data: AnalysisData) => {
     try {
+      console.log('Attempting to save resume:', { 
+        userId: user?.id, 
+        userEmail: user?.email,
+        hasOriginalFile: !!file.originalFile,
+        fileName: file.name 
+      });
+      
       const newItem = await saveResume(file, data, user?.id, file.originalFile);
+      
       if (newItem) {
+        console.log('Resume saved successfully:', newItem.id);
         setHistory([newItem, ...history]);
         const count = await getResumeCount(user?.id);
         setMatchCount(count);
+      } else {
+        console.error('saveResume returned null - save failed');
       }
     } catch (err) {
       console.error("Error saving to history:", err);

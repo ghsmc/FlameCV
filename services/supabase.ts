@@ -177,6 +177,11 @@ export const saveResume = async (
 
     if (error) {
       console.error('Error saving resume:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.details);
+      console.error('Error hint:', error.hint);
+      console.error('Attempting to insert:', { userId, hasUserId: !!userId });
       return null;
     }
 

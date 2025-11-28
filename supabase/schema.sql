@@ -20,20 +20,24 @@ CREATE INDEX IF NOT EXISTS idx_resumes_user_id ON resumes(user_id);
 -- Enable Row Level Security (RLS)
 ALTER TABLE resumes ENABLE ROW LEVEL SECURITY;
 
--- Drop old policy if it exists
+-- Drop old policies if they exist
 DROP POLICY IF EXISTS "Allow all operations" ON resumes;
+DROP POLICY IF EXISTS "Users can manage their own resumes" ON resumes;
+DROP POLICY IF EXISTS "Anonymous users can insert resumes" ON resumes;
 
--- Policy: Users can only manage their own resumes
--- Authenticated users can read and write their own resumes
-CREATE POLICY "Users can manage their own resumes" ON resumes
+-- Policy 1: Authenticated users can manage their own resumes
+CREATE POLICY "Authenticated users manage own resumes" ON resumes
   FOR ALL
   USING (auth.uid()::text = user_id)
   WITH CHECK (auth.uid()::text = user_id);
 
--- Policy: Allow anonymous users to insert resumes (for testing/onboarding)
--- This allows users to try the app before signing up
--- You can remove this policy if you want to require authentication
-CREATE POLICY "Anonymous users can insert resumes" ON resumes
+-- Policy 2: Anonymous users can insert and read their own resumes (for trial)
+-- Allows INSERT with null/empty user_id AND allows reading those back
+CREATE POLICY "Anonymous users can insert" ON resumes
   FOR INSERT
-  WITH CHECK (user_id IS NULL OR user_id = '');
+  WITH CHECK (auth.uid() IS NULL AND (user_id IS NULL OR user_id = ''));
+
+CREATE POLICY "Anonymous users can read own" ON resumes
+  FOR SELECT
+  USING (auth.uid() IS NULL AND (user_id IS NULL OR user_id = ''));
 
