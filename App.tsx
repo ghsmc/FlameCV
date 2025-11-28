@@ -7,7 +7,7 @@ import { Survey } from './components/Survey';
 import { AuthModal } from './components/AuthModal';
 import { AppState, FileData, AnalysisData, HistoryItem, UserPreferences } from './types';
 import { generateRoast } from './services/gemini';
-import { saveResume, getResumes, getResumeCount, signIn, signUp, signOut, getCurrentUser, onAuthStateChange, User } from './services/supabase';
+import { saveResume, getResumes, getResumeCount, signIn, signUp, signOut, signInWithGoogle, getCurrentUser, onAuthStateChange, User } from './services/supabase';
 import { Logo } from './components/Logo';
 import { SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
@@ -121,6 +121,10 @@ const App: React.FC = () => {
 
   const handleSignUp = async (email: string, password: string) => {
     await signUp(email, password);
+  };
+
+  const handleGoogleSignIn = async () => {
+    await signInWithGoogle();
   };
 
   const handleSignOut = async () => {
@@ -393,6 +397,7 @@ const App: React.FC = () => {
         onClose={() => setShowAuthModal(false)}
         onSignIn={handleSignIn}
         onSignUp={handleSignUp}
+        onGoogleSignIn={handleGoogleSignIn}
       />
     </div>
   );

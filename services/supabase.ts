@@ -358,3 +358,23 @@ export const onAuthStateChange = (callback: (user: User | null) => void) => {
   };
 };
 
+/**
+ * Sign in with Google OAuth
+ */
+export const signInWithGoogle = async (): Promise<void> => {
+  if (!supabase) {
+    throw new Error('Supabase not initialized');
+  }
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin,
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+};
+
