@@ -195,49 +195,6 @@ const App: React.FC = () => {
         />
       </motion.div>
 
-      {/* Full Width Landscape Background (Idle State Only) */}
-      <AnimatePresence>
-        {state === AppState.IDLE && showContent && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: smoothEase }}
-            className="fixed top-0 left-0 right-0 h-full overflow-hidden z-0 pointer-events-none"
-            aria-hidden="true"
-          >
-            {/* Sky gradient */}
-            <div className="absolute inset-0 bg-gradient-to-b from-orange-100/80 via-white to-white dark:from-orange-950/40 dark:via-[#020617] dark:to-[#020617]" />
-
-            {/* Back mountain layer */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-[45%] opacity-40 dark:opacity-20"
-              style={{
-                background: 'linear-gradient(180deg, #fdba74 0%, #f97316 100%)',
-                clipPath: 'polygon(0% 100%, 0% 40%, 15% 20%, 30% 35%, 45% 15%, 60% 30%, 75% 10%, 90% 25%, 100% 20%, 100% 100%)',
-              }}
-            />
-
-            {/* Middle mountain layer */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-[35%] opacity-50 dark:opacity-25"
-              style={{
-                background: 'linear-gradient(180deg, #fb923c 0%, #ea580c 100%)',
-                clipPath: 'polygon(0% 100%, 0% 60%, 20% 35%, 35% 55%, 50% 30%, 65% 45%, 80% 25%, 100% 40%, 100% 100%)',
-              }}
-            />
-
-            {/* Front hill layer */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-[25%] opacity-60 dark:opacity-30"
-              style={{
-                background: 'linear-gradient(180deg, #f97316 0%, #dc2626 100%)',
-                clipPath: 'polygon(0% 100%, 0% 75%, 25% 55%, 50% 70%, 75% 50%, 100% 65%, 100% 100%)',
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Main Layout Container */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 min-h-screen flex flex-col">
@@ -283,12 +240,20 @@ const App: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => setShowAuthModal(true)}
-                    className="text-sm font-medium text-gray-900 dark:text-white hover:opacity-70 transition-opacity"
-                  >
-                    Login
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                    >
+                      Login
+                    </button>
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="text-sm font-semibold px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-sm hover:shadow-md"
+                    >
+                      Sign up
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
