@@ -240,7 +240,14 @@ const App: React.FC = () => {
 
 
       {/* Main Layout Container */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 min-h-screen flex flex-col">
+      <motion.div 
+        className="relative z-10 min-h-screen flex flex-col transition-all duration-200"
+        animate={{ 
+          paddingLeft: sidebarOpen ? '280px' : '0px',
+        }}
+        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <div className="max-w-4xl mx-auto px-6 w-full flex flex-col flex-1">
 
         {/* Header - Floating Navbar */}
         <motion.header
@@ -428,7 +435,8 @@ const App: React.FC = () => {
 
           </AnimatePresence>
         </main>
-      </div>
+        </div>
+      </motion.div>
 
       {/* Auth Modal */}
       <AuthModal

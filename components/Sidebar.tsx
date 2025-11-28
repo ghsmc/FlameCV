@@ -96,15 +96,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -280, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="fixed left-0 top-0 bottom-0 w-[280px] bg-gray-50 dark:bg-[#0a0a0f] border-r border-gray-200 dark:border-white/10 z-40 flex flex-col"
+            className="fixed left-0 top-0 bottom-0 w-[280px] bg-white/80 dark:bg-[#020617]/95 backdrop-blur-xl border-r border-gray-200/50 dark:border-white/5 z-40 flex flex-col"
           >
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 dark:border-white/10">
+            <div className="p-4 border-b border-gray-100 dark:border-white/5">
               <button
                 onClick={onNewAnalysis}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 transition-colors text-sm font-medium text-gray-900 dark:text-white"
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-500/10 to-red-500/10 dark:from-orange-500/20 dark:to-red-500/20 border border-orange-200/50 dark:border-orange-500/20 rounded-xl hover:from-orange-500/20 hover:to-red-500/20 dark:hover:from-orange-500/30 dark:hover:to-red-500/30 transition-all text-sm font-medium text-gray-900 dark:text-white"
               >
-                <PlusIcon className="w-5 h-5" />
+                <PlusIcon className="w-5 h-5 text-orange-500" />
                 New Analysis
               </button>
             </div>
@@ -115,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div className="space-y-6">
                   {groupedHistory.map((group) => (
                     <div key={group.label}>
-                      <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-500 uppercase tracking-wider px-2 mb-2">
+                      <h4 className="text-[10px] font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-2 mb-2">
                         {group.label}
                       </h4>
                       <div className="space-y-1">
@@ -127,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             <button
                               key={item.id}
                               onClick={() => onSelect(item)}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white dark:hover:bg-white/5 transition-colors text-left group"
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors text-left group"
                             >
                               {/* Logo or Icon */}
                               {topMatch ? (
@@ -177,10 +177,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Footer */}
             {user && history.length > 0 && (
-              <div className="p-3 border-t border-gray-200 dark:border-white/10">
+              <div className="p-3 border-t border-gray-100 dark:border-white/5">
                 <button
                   onClick={onClear}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                 >
                   <TrashIcon className="w-3.5 h-3.5" />
                   Clear history
@@ -192,18 +192,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </AnimatePresence>
 
       {/* Toggle Button */}
-      <button
+      <motion.button
         onClick={onToggle}
-        className={`fixed top-4 z-50 p-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-all ${
-          isOpen ? 'left-[292px]' : 'left-4'
-        }`}
+        animate={{ left: isOpen ? 292 : 16 }}
+        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="fixed top-4 z-50 p-2 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors"
       >
         {isOpen ? (
-          <ChevronLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          <ChevronLeftIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
         ) : (
-          <ChevronRightIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          <ChevronRightIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
         )}
-      </button>
+      </motion.button>
 
       {/* Overlay for mobile */}
       <AnimatePresence>
