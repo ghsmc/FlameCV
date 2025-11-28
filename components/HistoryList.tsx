@@ -17,7 +17,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ history, onSelect, onC
       <div className="flex items-center justify-between mb-6 px-2">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <ClockIcon className="w-5 h-5 text-gray-400" />
-          Recent Roasts
+          Previous Analyses
         </h3>
         <button 
           onClick={onClear}

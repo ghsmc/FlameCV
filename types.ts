@@ -4,6 +4,7 @@ export enum AppState {
   ANALYZING = 'ANALYZING',
   COMPLETE = 'COMPLETE',
   ERROR = 'ERROR',
+  HISTORY = 'HISTORY',
 }
 
 export interface UserPreferences {

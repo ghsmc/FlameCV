@@ -28,7 +28,6 @@ const App: React.FC = () => {
   const [showContent, setShowContent] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -191,14 +190,16 @@ const App: React.FC = () => {
     setPreferences(null);
     setError(null);
     setThinkingSteps([]);
-    setShowHistory(false);
+  };
+
+  const handleShowHistory = () => {
+    setState(AppState.HISTORY);
   };
 
   const handleHistorySelect = (item: HistoryItem) => {
     setMatchData(item.analysis);
     setCurrentFile(item.resume);
     setState(AppState.COMPLETE);
-    setShowHistory(false);
   };
 
   const handleClearHistory = async () => {
@@ -263,11 +264,15 @@ const App: React.FC = () => {
                   <div className="flex items-center gap-3">
                     {matchCount > 0 && (
                       <button
-                        onClick={() => setShowHistory(!showHistory)}
-                        className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        onClick={handleShowHistory}
+                        className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                          state === AppState.HISTORY 
+                            ? 'text-orange-600 dark:text-orange-400' 
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                        }`}
                       >
                         <ClockIcon className="w-4 h-4" />
-                        <span className="hidden sm:inline">My Matches</span>
+                        <span className="hidden sm:inline">My Analyses</span>
                         <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full font-semibold">
                           {matchCount}
                         </span>
@@ -310,7 +315,7 @@ const App: React.FC = () => {
           <AnimatePresence mode="wait">
 
             {/* History View */}
-            {showHistory && user && history.length > 0 && (
+            {state === AppState.HISTORY && (
               <motion.div
                 key="history"
                 initial={{ opacity: 0, y: 20 }}
@@ -321,28 +326,42 @@ const App: React.FC = () => {
               >
                 <div className="mb-8">
                   <button
-                    onClick={() => setShowHistory(false)}
+                    onClick={handleReset}
                     className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
                   >
-                    ← Back
+                    ← Back to Home
                   </button>
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    My Matches
+                    My Analyses
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
                     View and revisit your previous startup matches
                   </p>
                 </div>
-                <HistoryList
-                  history={history}
-                  onSelect={handleHistorySelect}
-                  onClear={handleClearHistory}
-                />
+                {history.length > 0 ? (
+                  <HistoryList
+                    history={history}
+                    onSelect={handleHistorySelect}
+                    onClear={handleClearHistory}
+                  />
+                ) : (
+                  <div className="text-center py-16">
+                    <ClockIcon className="w-12 h-12 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No analyses yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">Upload a resume to get your first match analysis</p>
+                    <button
+                      onClick={handleReset}
+                      className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium rounded-lg hover:from-orange-600 hover:to-red-600 transition-all"
+                    >
+                      Get Started
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
 
             {/* Landing Page - Centered Layout */}
-            {state === AppState.IDLE && showContent && !showHistory && (
+            {state === AppState.IDLE && showContent && (
               <motion.div
                 key="landing"
                 initial={{ opacity: 0 }}
