@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HistoryItem } from '../types';
 import { 
-  ChevronLeftIcon, 
-  ChevronRightIcon,
   PlusIcon,
   TrashIcon,
   ClockIcon,
+  Bars3BottomLeftIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -191,18 +190,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Toggle Button */}
+      {/* Toggle Button - Aligned with navbar */}
       <motion.button
         onClick={onToggle}
-        animate={{ left: isOpen ? 292 : 16 }}
+        animate={{ left: isOpen ? 292 : 24 }}
         transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="fixed top-4 z-50 p-2 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors"
+        className="fixed top-6 z-50 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
       >
-        {isOpen ? (
-          <ChevronLeftIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-        ) : (
-          <ChevronRightIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-        )}
+        <svg 
+          className="w-5 h-5 text-gray-600 dark:text-gray-400" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="1.5"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+        </svg>
       </motion.button>
 
       {/* Overlay for mobile */}
