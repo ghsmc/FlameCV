@@ -209,13 +209,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Toggle Button - Aligned with navbar */}
+      {/* Toggle Button - Below navbar on mobile, aligned with navbar on desktop */}
       <button
         onClick={onToggle}
-        className={`fixed top-[22px] sm:top-[30px] z-50 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all duration-200 ${
-          isOpen 
-            ? 'left-[calc(85vw+12px)] sm:left-[292px] max-[639px]:left-[min(calc(85vw+12px),292px)]' 
-            : 'left-4 sm:left-6'
+        className={`fixed top-[72px] sm:top-[30px] z-50 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all duration-200 ${
+          isOpen
+            ? 'left-[calc(85vw+12px)] sm:left-[292px] max-[639px]:left-[min(calc(85vw+12px),292px)]'
+            : 'left-3 sm:left-6'
         }`}
       >
         <svg 

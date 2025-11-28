@@ -130,7 +130,7 @@ const ReasoningSection: React.FC<{
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.3 }}
-      className={`rounded-xl border overflow-hidden transition-all duration-300 ${
+      className={`rounded-lg sm:rounded-xl border overflow-hidden transition-all duration-300 ${
         isActive
           ? 'border-orange-300 dark:border-orange-500/30 bg-orange-50/50 dark:bg-orange-900/10'
           : isComplete
@@ -141,12 +141,12 @@ const ReasoningSection: React.FC<{
       <button
         onClick={onToggle}
         disabled={!step}
-        className={`w-full px-4 py-3.5 flex items-center gap-3 text-left transition-colors ${
+        className={`w-full px-3 sm:px-4 py-2.5 sm:py-3.5 flex items-center gap-2.5 sm:gap-3 text-left transition-colors ${
           step ? 'hover:bg-gray-100/50 dark:hover:bg-white/[0.02] cursor-pointer' : 'cursor-default'
         }`}
       >
         {/* Step number indicator */}
-        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+        <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
           isActive
             ? 'bg-orange-500 text-white'
             : isComplete
@@ -155,26 +155,26 @@ const ReasoningSection: React.FC<{
         }`}>
           {isActive ? (
             <motion.div
-              className="w-2 h-2 bg-white rounded-full"
+              className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
             />
           ) : (
-            <span className="text-xs font-medium">{index + 1}</span>
+            <span className="text-[10px] sm:text-xs font-medium">{index + 1}</span>
           )}
         </div>
-        
+
         {/* Title */}
         <div className="flex-1 min-w-0">
           {isActive ? (
             <div className="flex items-center">
-              <ShimmerText className="font-medium text-sm sm:text-base">
+              <ShimmerText className="font-medium text-xs sm:text-base">
                 {config.title}
               </ShimmerText>
               <ThinkingDots />
             </div>
           ) : (
-            <span className={`font-medium text-sm sm:text-base ${
+            <span className={`font-medium text-xs sm:text-base ${
               isComplete ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'
             }`}>
               {config.title}
@@ -184,13 +184,13 @@ const ReasoningSection: React.FC<{
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-xs text-orange-600 dark:text-orange-400 mt-0.5"
+              className="text-[10px] sm:text-xs text-orange-600 dark:text-orange-400 mt-0.5 truncate"
             >
               {config.subtitle}
             </motion.p>
           )}
         </div>
-        
+
         {/* Chevron */}
         {step && (
           <motion.div
@@ -198,7 +198,7 @@ const ReasoningSection: React.FC<{
             transition={{ duration: 0.2 }}
             className="flex-shrink-0"
           >
-            <ChevronDownIcon className={`w-4 h-4 ${
+            <ChevronDownIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${
               isActive ? 'text-orange-500' : 'text-gray-400'
             }`} />
           </motion.div>
@@ -215,9 +215,9 @@ const ReasoningSection: React.FC<{
             transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="overflow-hidden"
           >
-            <div ref={contentRef} className="px-4 pb-4">
-              <div className="pl-9">
-                <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+            <div ref={contentRef} className="px-3 sm:px-4 pb-3 sm:pb-4">
+              <div className="pl-7 sm:pl-9">
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                   {isActive ? (
                     <TypewriterText text={step.content} speed={5} onComplete={onStreamComplete} />
                   ) : (
@@ -440,37 +440,37 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         </motion.div>
 
         {/* Content Overlay */}
-        <div className="relative z-20 w-full max-w-xl px-4 sm:px-6">
-          <motion.div 
+        <div className="relative z-20 w-full max-w-xl px-3 sm:px-6">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4 sm:p-6"
+            className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-2xl border border-white/20 p-3 sm:p-6"
           >
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="relative w-10 h-10">
+            <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
                 <motion.div
                   className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.1, 1],
                     opacity: [0.7, 1, 0.7]
                   }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 />
-                <div className="absolute inset-2 rounded-full bg-white dark:bg-gray-900" />
+                <div className="absolute inset-1.5 sm:inset-2 rounded-full bg-white dark:bg-gray-900" />
                 <motion.div
-                  className="absolute inset-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
+                  className="absolute inset-2 sm:inset-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
                   animate={{ rotate: 360 }}
                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                 />
               </div>
-              
-              <div>
-                <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+
+              <div className="min-w-0">
+                <h2 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                   {isSearching ? 'Finding Your Matches' : 'Analyzing Your Profile'}
                 </h2>
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  {isSearching ? 'Searching for startups that fit you perfectly' : 'See how the AI thinks about your profile'}
+                <p className="text-[10px] sm:text-sm text-gray-500 dark:text-gray-400 truncate">
+                  {isSearching ? 'Searching for startups that fit you' : 'AI analyzing your profile'}
                 </p>
               </div>
             </div>
@@ -505,28 +505,28 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 pt-4 border-t border-gray-200 dark:border-white/10"
+                className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200 dark:border-white/10"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 sm:gap-3">
                   <motion.div
-                    className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center"
+                    className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0"
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ duration: 1, repeat: Infinity }}
                   >
                     <motion.div
-                      className="w-2 h-2 bg-white rounded-full"
+                      className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"
                       animate={{ scale: [1, 1.3, 1] }}
                       transition={{ duration: 1, repeat: Infinity }}
                     />
                   </motion.div>
-                  <div className="flex-1">
-                    <ShimmerText className="font-medium text-sm">
-                      {thinkingSteps.find(s => s.phase === 'structuring') 
-                        ? 'Preparing your matches...' 
+                  <div className="flex-1 min-w-0">
+                    <ShimmerText className="font-medium text-xs sm:text-sm">
+                      {thinkingSteps.find(s => s.phase === 'structuring')
+                        ? 'Preparing your matches...'
                         : 'Searching for startups...'}
                     </ShimmerText>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Using Google Search to find real companies
+                    <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
+                      Using Google Search to find companies
                     </p>
                   </div>
                   <ThinkingDots />
@@ -560,31 +560,31 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   }, [showThinking]);
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 w-full">
-      <motion.div 
+    <div className="flex flex-col items-center justify-center py-12 sm:py-20 w-full px-4">
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative mb-8"
+        className="relative mb-6 sm:mb-8"
       >
-        <div className="relative w-16 h-16">
+        <div className="relative w-12 h-12 sm:w-16 sm:h-16">
           <motion.div
             className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400/30 to-red-500/30"
-            animate={{ 
+            animate={{
               scale: [1, 1.3, 1],
               opacity: [0.5, 0.2, 0.5]
             }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute inset-2 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
-            animate={{ 
+            className="absolute inset-1.5 sm:inset-2 rounded-full bg-gradient-to-br from-orange-400 to-red-500"
+            animate={{
               scale: [1, 1.1, 1],
             }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           />
-          <div className="absolute inset-4 rounded-full bg-white dark:bg-[#020617]" />
+          <div className="absolute inset-3 sm:inset-4 rounded-full bg-white dark:bg-[#020617]" />
           <motion.div
-            className="absolute inset-5 rounded-full"
+            className="absolute inset-3.5 sm:inset-5 rounded-full"
             style={{
               background: 'conic-gradient(from 0deg, #f97316, #ef4444, #f97316)',
             }}
@@ -600,18 +600,18 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         transition={{ delay: 0.2 }}
         className="text-center"
       >
-        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+        <h2 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-1">
           Analyzing
           <ThinkingDots />
         </h2>
         <AnimatePresence mode="wait">
-          <motion.p 
+          <motion.p
             key={initialMessage}
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.2 }}
-            className="text-sm text-gray-500 dark:text-gray-400"
+            className="text-xs sm:text-sm text-gray-500 dark:text-gray-400"
           >
             {initialMessage}
           </motion.p>
