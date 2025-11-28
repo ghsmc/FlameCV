@@ -366,111 +366,13 @@ const App: React.FC = () => {
                       {/* Editor Header */}
                       <div className="h-10 border-b border-gray-100 dark:border-white/5 flex items-center px-4 gap-3 bg-gray-50/50 dark:bg-white/[0.02]">
                         <div className="flex-1 text-center">
-                          <span className="text-xs font-medium text-gray-400 font-mono">Matchpoint Report</span>
+                          <span className="text-xs font-medium text-gray-400 font-mono">upload_resume.tsx</span>
                         </div>
                       </div>
                       
-                      {/* Editor Content Area */}
-                      <div className="flex h-[420px]">
-                        {/* Sidebar (Fake) */}
-                        <div className="hidden sm:flex w-48 border-r border-gray-100 dark:border-white/5 flex-col py-3 bg-gray-50/30 dark:bg-white/[0.01]">
-                          <div className="px-4 py-1 flex items-center justify-between mb-2">
-                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Top Matches</span>
-                            <span className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">+</span>
-                          </div>
-                          <div className="px-2 space-y-1">
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5 rounded-md font-mono">
-                              <img src="https://img.logo.dev/vercel.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="w-3 h-3 object-contain rounded-full" alt="Vercel" />
-                              Vercel
-                            </div>
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
-                              <img src="https://img.logo.dev/linear.app?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="w-3 h-3 object-contain rounded-full opacity-60" alt="Linear" />
-                              Linear
-                            </div>
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
-                              <img src="https://img.logo.dev/supabase.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="w-3 h-3 object-contain rounded-full opacity-60" alt="Supabase" />
-                              Supabase
-                            </div>
-                          </div>
-
-                          <div className="px-4 py-1 flex items-center justify-between mb-2 mt-4">
-                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Your Skills</span>
-                            <span className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">+</span>
-                          </div>
-                          <div className="px-2 space-y-1">
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
-                              <span className="text-blue-500">TS</span>
-                              TypeScript
-                            </div>
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
-                              <span className="text-yellow-500">JS</span>
-                              React
-                            </div>
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-gray-500 dark:text-gray-500 font-mono">
-                              <span className="text-purple-500">AI</span>
-                              LLMs
-                            </div>
-                          </div>
-
-                          <div className="px-4 py-1 flex items-center justify-between mb-2 mt-4">
-                            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-mono">Preferences</span>
-                            <span className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer">+</span>
-                          </div>
-                          <div className="px-2 flex flex-wrap gap-1.5">
-                            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 font-mono">
-                              Remote Only
-                            </span>
-                            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 font-mono">
-                              Series A+
-                            </span>
-                            <span className="inline-flex items-center px-2 py-1 rounded text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 font-mono">
-                              Equity
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Main Content (Demo Report) */}
-                        <div className="flex-1 p-6 relative bg-white dark:bg-[#0B1120] overflow-y-auto custom-scrollbar">
-                          {/* Demo Report Visual */}
-                          <div className="space-y-6">
-                            {/* Match Score Card */}
-                            <div className="p-4 rounded-lg border border-green-100 bg-green-50/50 dark:border-green-900/30 dark:bg-green-900/10">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-medium text-green-700 dark:text-green-400 uppercase tracking-wider">Match Score</span>
-                                <span className="text-lg font-bold text-green-700 dark:text-green-400">98%</span>
-                              </div>
-                              <div className="w-full bg-green-200 dark:bg-green-900/30 h-1.5 rounded-full overflow-hidden">
-                                <div className="bg-green-500 h-full rounded-full w-[98%]" />
-                              </div>
-                            </div>
-
-                            {/* Top Match Detail */}
-                            <div>
-                              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Primary Match</h4>
-                              <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-lg border border-gray-200 dark:border-white/10 flex items-center justify-center bg-white dark:bg-white/5">
-                                  <img src="https://img.logo.dev/vercel.com?token=pk_c2nKhfMyRIOeCjrk-6-RRw" className="w-6 h-6 object-contain" alt="Vercel" />
-                                </div>
-                                <div>
-                                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Vercel</h3>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Frontend Infrastructure</p>
-                                  <div className="mt-2 flex flex-wrap gap-1.5">
-                                    <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-white/10 rounded text-gray-600 dark:text-gray-300">React Core</span>
-                                    <span className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-white/10 rounded text-gray-600 dark:text-gray-300">Next.js</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Analysis Snippet */}
-                            <div>
-                              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Why it fits</h4>
-                              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Your experience with high-performance React applications and edge computing aligns perfectly with Vercel's mission. Strong open source contributions signal culture fit.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                      {/* File Upload Component */}
+                      <div className="p-8 md:p-12 bg-gray-50/50 dark:bg-black/20 h-[420px] flex flex-col justify-center">
+                        <FileUpload onFileSelect={handleFileSelect} />
                       </div>
                     </motion.div>
                   </div>
@@ -513,6 +415,28 @@ const App: React.FC = () => {
                         </div>
                       </React.Fragment>
                     ))}
+                  </div>
+                </motion.div>
+
+                {/* Upload Section (Duplicated Window Style) */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  className="mt-12 mb-24 max-w-4xl mx-auto"
+                >
+                  <div className="relative z-20 w-full bg-white dark:bg-[#020617] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden">
+                    <div className="h-10 border-b border-gray-100 dark:border-white/5 flex items-center px-4 gap-3 bg-gray-50/50 dark:bg-white/[0.02]">
+                      <div className="flex-1 text-center">
+                        <span className="text-xs font-medium text-gray-400 font-mono">upload_resume.tsx</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-8 md:p-12 bg-gray-50/50 dark:bg-black/20">
+                      <div className="max-w-xl mx-auto">
+                        <FileUpload onFileSelect={handleFileSelect} />
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
 
