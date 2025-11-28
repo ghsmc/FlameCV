@@ -9,27 +9,36 @@ interface HistoryListProps {
   onClear: () => void;
 }
 
-// Generate a dynamic title based on the analysis content
+// Generate a dynamic, interesting title based on the analysis content
 const generateTitle = (item: HistoryItem): string => {
   const matches = item.analysis.careerAdvice?.companyMatches || [];
   const targetRole = item.analysis.careerAdvice?.recommendedRoles?.[0];
   const level = item.analysis.careerAdvice?.currentLevel;
+  const salary = item.analysis.careerAdvice?.estimatedSalary;
   
-  // Try to create a meaningful title
-  if (targetRole && matches.length > 0) {
-    return `${targetRole} → ${matches.length} startup matches`;
+  // Creative title patterns
+  const patterns = [
+    // Role-focused
+    () => targetRole && matches.length > 0 && `Your path to ${targetRole}`,
+    () => targetRole && `${targetRole} opportunities unlocked`,
+    
+    // Level + salary focused  
+    () => level && salary && `${level} • ${salary} range`,
+    () => level && matches.length > 0 && `${level} → ${matches.length} perfect fits`,
+    
+    // Match-focused
+    () => matches.length >= 10 && `${matches.length} startups want you`,
+    () => matches.length > 0 && matches[0].tier === 'Reach' && `Reach for ${matches[0].name}`,
+    () => matches.length > 0 && `${matches.length} matches found`,
+  ];
+  
+  // Find first valid pattern
+  for (const pattern of patterns) {
+    const result = pattern();
+    if (result) return result;
   }
   
-  if (level && matches.length > 0) {
-    return `${level} profile → ${matches.length} matches`;
-  }
-  
-  if (matches.length > 0) {
-    const topCompanies = matches.slice(0, 2).map(m => m.name).join(', ');
-    return `Matched with ${topCompanies}${matches.length > 2 ? ` +${matches.length - 2} more` : ''}`;
-  }
-  
-  // Fallback to filename without extension
+  // Fallback
   const nameWithoutExt = item.fileName.replace(/\.[^/.]+$/, '');
   return `Analysis: ${nameWithoutExt}`;
 };
@@ -77,7 +86,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({ history, onSelect, onC
               transition={{ delay: index * 0.03 }}
               className="bg-white dark:bg-white/[0.03] border border-gray-200 dark:border-white/10 rounded-xl overflow-hidden hover:border-gray-300 dark:hover:border-white/20 transition-all"
             >
-              {/* Main Row - Title Only */}
+              {/* Main Row - Title + Top 3 Logos */}
               <div 
                 className="flex items-center justify-between px-4 py-3 cursor-pointer group"
                 onClick={() => onSelect(item)}
@@ -102,13 +111,43 @@ export const HistoryList: React.FC<HistoryListProps> = ({ history, onSelect, onC
                   </span>
                 </div>
                 
-                {/* Timestamp */}
-                <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 ml-3">
-                  {new Date(item.timestamp).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric'
-                  })}
-                </span>
+                <div className="flex items-center gap-3 flex-shrink-0 ml-3">
+                  {/* Top 3 Company Logos */}
+                  {topMatches.length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      {topMatches.slice(0, 3).map((company, i) => (
+                        <div key={i} className="relative group/logo">
+                          <img
+                            src={`https://img.logo.dev/${company.domain}?token=pk_c2nKhfMyRIOeCjrk-6-RRw`}
+                            alt={company.name}
+                            className="w-6 h-6 rounded-md border border-gray-200 dark:border-gray-700 bg-white object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=f3f4f6&color=6b7280&size=24`;
+                            }}
+                          />
+                          {/* Tooltip on hover */}
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs rounded-md whitespace-nowrap opacity-0 group-hover/logo:opacity-100 transition-opacity pointer-events-none z-10">
+                            {company.name}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-white" />
+                          </div>
+                        </div>
+                      ))}
+                      {matches.length > 3 && (
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
+                          +{matches.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Timestamp */}
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    {new Date(item.timestamp).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
               </div>
 
               {/* Expandable Content */}
