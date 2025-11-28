@@ -5,12 +5,12 @@ import { LoadingScreen, ThinkingStep } from './components/LoadingScreen';
 import { RoastResult } from './components/RoastResult';
 import { Survey } from './components/Survey';
 import { AuthModal } from './components/AuthModal';
-import { HistoryList } from './components/HistoryList';
+import { Sidebar } from './components/Sidebar';
 import { AppState, FileData, AnalysisData, HistoryItem, UserPreferences } from './types';
 import { generateRoast } from './services/gemini';
 import { saveResume, getResumes, getResumeCount, signIn, signUp, signOut, signInWithGoogle, getCurrentUser, onAuthStateChange, User } from './services/supabase';
 import { Logo } from './components/Logo';
-import { SunIcon, MoonIcon, ArrowRightOnRectangleIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 // Smooth easing curve for professional feel
 const smoothEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [showContent, setShowContent] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -192,11 +193,8 @@ const App: React.FC = () => {
     setThinkingSteps([]);
   };
 
-  const handleShowHistory = () => {
-    setState(AppState.HISTORY);
-  };
-
   const handleHistorySelect = (item: HistoryItem) => {
+    setSidebarOpen(false);
     setMatchData(item.analysis);
     setCurrentFile(item.resume);
     setState(AppState.COMPLETE);
@@ -212,6 +210,17 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#020617] text-gray-900 dark:text-gray-100 font-sans selection:bg-orange-100 selection:text-orange-900 dark:selection:bg-orange-900/30 dark:selection:text-orange-100 transition-colors duration-300">
+      
+      {/* Sidebar */}
+      <Sidebar
+        history={history}
+        onSelect={handleHistorySelect}
+        onClear={handleClearHistory}
+        onNewAnalysis={handleReset}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        user={user}
+      />
 
       {/* Portal Transition Overlay */}
       <motion.div className="fixed inset-0 z-[100] flex flex-col pointer-events-none">
@@ -231,7 +240,11 @@ const App: React.FC = () => {
 
 
       {/* Main Layout Container */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 min-h-screen flex flex-col">
+      <motion.div 
+        className="relative z-10 max-w-4xl mx-auto px-6 min-h-screen flex flex-col"
+        animate={{ marginLeft: sidebarOpen ? '280px' : '0px' }}
+        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
 
         {/* Header - Floating Navbar */}
         <motion.header
@@ -262,22 +275,6 @@ const App: React.FC = () => {
                 <div className="w-px h-5 bg-gray-200 dark:bg-white/10" />
                 {user ? (
                   <div className="flex items-center gap-3">
-                    {matchCount > 0 && (
-                      <button
-                        onClick={handleShowHistory}
-                        className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                          state === AppState.HISTORY 
-                            ? 'text-orange-600 dark:text-orange-400' 
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                        }`}
-                      >
-                        <ClockIcon className="w-4 h-4" />
-                        <span className="hidden sm:inline">My Analyses</span>
-                        <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full font-semibold">
-                          {matchCount}
-                        </span>
-                      </button>
-                    )}
                     <span className="text-sm text-gray-600 dark:text-gray-400 hidden md:inline">
                       {user.email}
                     </span>
@@ -313,52 +310,6 @@ const App: React.FC = () => {
         {/* Main Content Area */}
         <main className="flex-grow flex flex-col">
           <AnimatePresence mode="wait">
-
-            {/* History View */}
-            {state === AppState.HISTORY && (
-              <motion.div
-                key="history"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4 }}
-                className="w-full max-w-5xl mx-auto py-12"
-              >
-                <div className="mb-8">
-                  <button
-                    onClick={handleReset}
-                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors mb-4"
-                  >
-                    ← Back to Home
-                  </button>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    My Analyses
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    View and revisit your previous startup matches
-                  </p>
-                </div>
-                {history.length > 0 ? (
-                  <HistoryList
-                    history={history}
-                    onSelect={handleHistorySelect}
-                    onClear={handleClearHistory}
-                  />
-                ) : (
-                  <div className="text-center py-16">
-                    <ClockIcon className="w-12 h-12 text-gray-300 dark:text-gray-700 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No analyses yet</h3>
-                    <p className="text-gray-500 dark:text-gray-400 mb-6">Upload a resume to get your first match analysis</p>
-                    <button
-                      onClick={handleReset}
-                      className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium rounded-lg hover:from-orange-600 hover:to-red-600 transition-all"
-                    >
-                      Get Started
-                    </button>
-                  </div>
-                )}
-              </motion.div>
-            )}
 
             {/* Landing Page - Centered Layout */}
             {state === AppState.IDLE && showContent && (
@@ -481,7 +432,7 @@ const App: React.FC = () => {
 
           </AnimatePresence>
         </main>
-      </div>
+      </motion.div>
 
       {/* Auth Modal */}
       <AuthModal
