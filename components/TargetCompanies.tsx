@@ -67,33 +67,33 @@ const CompanyCard: React.FC<{
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="group relative flex flex-col bg-white dark:bg-white/[0.03] rounded-2xl border border-gray-200/80 dark:border-white/[0.06] hover:border-gray-300 dark:hover:border-white/10 hover:shadow-lg dark:hover:shadow-none transition-all duration-300 overflow-hidden"
+      className="group relative flex flex-col bg-white dark:bg-white/[0.03] rounded-xl sm:rounded-2xl border border-gray-200/80 dark:border-white/[0.06] hover:border-gray-300 dark:hover:border-white/10 hover:shadow-lg dark:hover:shadow-none transition-all duration-300 overflow-hidden"
     >
       {/* Match Score Badge */}
       {company.matchScore && (
-        <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-bold ${getMatchScoreColor(company.matchScore)}`}>
-          {company.matchScore}% match
+        <div className={`absolute top-2 sm:top-3 right-2 sm:right-3 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold ${getMatchScoreColor(company.matchScore)}`}>
+          {company.matchScore}%
         </div>
       )}
 
       {/* Main Content */}
-      <div className="p-4 sm:p-5">
+      <div className="p-3 sm:p-5">
         {/* Header: Logo + Name + Industry */}
-        <div className="flex items-start gap-3 sm:gap-4 mb-4">
-          <img 
+        <div className="flex items-start gap-2.5 sm:gap-4 mb-3 sm:mb-4">
+          <img
             src={`https://img.logo.dev/${company.domain}?token=pk_c2nKhfMyRIOeCjrk-6-RRw`}
             alt={`${company.name} logo`}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-contain bg-white border border-gray-100 dark:border-gray-800 shrink-0 shadow-sm"
+            className="w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl object-contain bg-white border border-gray-100 dark:border-gray-800 shrink-0 shadow-sm"
             onError={(e) => {
               (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=f3f4f6&color=6b7280&size=56`;
             }}
           />
           <div className="flex-1 min-w-0">
-            <h5 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate mb-1">
+            <h5 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base truncate mb-0.5 sm:mb-1 pr-8 sm:pr-12">
               {company.name}
             </h5>
             {company.industry && (
-              <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-md ${tierColor}`}>
+              <span className={`inline-flex items-center text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-md ${tierColor}`}>
                 {company.industry}
               </span>
             )}
@@ -102,47 +102,47 @@ const CompanyCard: React.FC<{
 
         {/* Description */}
         {company.description && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 line-clamp-2">
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3 sm:mb-4 line-clamp-2">
             {company.description}
           </p>
         )}
 
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
           {company.location && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <MapPinIcon className="w-3.5 h-3.5 shrink-0" />
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+              <MapPinIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
               <span className="truncate">{company.location}</span>
             </div>
           )}
           {company.employeeCount && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <UsersIcon className="w-3.5 h-3.5 shrink-0" />
-              <span>{company.employeeCount} people</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+              <UsersIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+              <span>{company.employeeCount}</span>
             </div>
           )}
           {company.funding && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <CurrencyDollarIcon className="w-3.5 h-3.5 shrink-0" />
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+              <CurrencyDollarIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
               <span className="truncate">{company.funding}</span>
             </div>
           )}
           {company.foundedYear && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
-              <span>Founded {company.foundedYear}</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+              <CalendarIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+              <span>{company.foundedYear}</span>
             </div>
           )}
         </div>
 
-        {/* Tech Stack */}
+        {/* Tech Stack - Hidden on mobile to save space */}
         {company.techStack && company.techStack.length > 0 && (
-          <div className="flex items-center gap-2 mb-4">
+          <div className="hidden sm:flex items-center gap-2 mb-4">
             <CommandLineIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
             <div className="flex flex-wrap gap-1.5">
               {company.techStack.slice(0, 4).map((tech, i) => (
-                <span 
-                  key={i} 
+                <span
+                  key={i}
                   className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400"
                 >
                   {tech}
@@ -152,9 +152,9 @@ const CompanyCard: React.FC<{
           </div>
         )}
 
-        {/* Investors */}
+        {/* Investors - Hidden on mobile */}
         {company.investors && company.investors.length > 0 && (
-          <div className="flex items-center gap-2 mb-4 text-xs text-gray-500 dark:text-gray-400">
+          <div className="hidden sm:flex items-center gap-2 mb-4 text-xs text-gray-500 dark:text-gray-400">
             <BuildingOfficeIcon className="w-3.5 h-3.5 shrink-0" />
             <span>Backed by {company.investors.slice(0, 2).join(', ')}</span>
           </div>
@@ -162,13 +162,13 @@ const CompanyCard: React.FC<{
 
         {/* Hiring Roles */}
         {company.hiringRoles && company.hiringRoles.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {company.hiringRoles.map((role, i) => (
-              <span 
-                key={i} 
-                className="text-xs font-medium px-2 py-1 rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 border border-violet-100 dark:border-violet-800/30"
+          <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3 sm:mb-4">
+            {company.hiringRoles.slice(0, 2).map((role, i) => (
+              <span
+                key={i}
+                className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 border border-violet-100 dark:border-violet-800/30"
               >
-                Hiring: {role}
+                {role}
               </span>
             ))}
           </div>
@@ -177,16 +177,16 @@ const CompanyCard: React.FC<{
         {/* Expandable Match Reason */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between text-left py-2 border-t border-gray-100 dark:border-white/5"
+          className="w-full flex items-center justify-between text-left py-1.5 sm:py-2 border-t border-gray-100 dark:border-white/5"
         >
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          <span className="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-gray-400">
             Why this matches you
           </span>
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.2 }}
           >
-            <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+            <ChevronDownIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
           </motion.div>
         </button>
 
@@ -199,7 +199,7 @@ const CompanyCard: React.FC<{
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed pt-2 italic">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed pt-2 italic">
                 "{company.reason}"
               </p>
             </motion.div>
@@ -208,20 +208,20 @@ const CompanyCard: React.FC<{
       </div>
 
       {/* Action Footer - Yes/No Buttons */}
-      <div className="mt-auto border-t border-gray-100 dark:border-white/5 p-3 bg-gray-50/50 dark:bg-white/[0.02]">
+      <div className="mt-auto border-t border-gray-100 dark:border-white/5 p-2 sm:p-3 bg-gray-50/50 dark:bg-white/[0.02]">
         <div className="flex gap-2">
           <button
             onClick={handleNo}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-200 dark:border-red-800/30"
+            className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg sm:rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border border-red-200 dark:border-red-800/30 active:scale-95"
           >
-            <XMarkIcon className="w-4 h-4" />
+            <XMarkIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             No
           </button>
           <button
             onClick={handleYes}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors border border-emerald-200 dark:border-emerald-800/30"
+            className="flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg sm:rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors border border-emerald-200 dark:border-emerald-800/30 active:scale-95"
           >
-            <CheckIcon className="w-4 h-4" />
+            <CheckIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             Yes
           </button>
         </div>
@@ -245,30 +245,30 @@ const TierSection: React.FC<{
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-4 sm:gap-6"
     >
       {/* Section Header */}
-      <div className="flex items-center gap-4">
-        <div className={`p-3 rounded-xl ${bgClass} ${colorClass}`}>
-          {icon}
+      <div className="flex items-center gap-3 sm:gap-4">
+        <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl ${bgClass} ${colorClass}`}>
+          <div className="w-5 h-5 sm:w-6 sm:h-6">{icon}</div>
         </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <h4 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <h4 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 dark:text-white">
               {title}
             </h4>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400">
+            <span className="text-[10px] sm:text-xs font-semibold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400">
               {companies.length}
             </span>
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">
             {subtitle}
           </p>
         </div>
       </div>
 
       {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
         {companies.map((company, index) => (
           <CompanyCard
             key={`${company.name}-${index}`}
@@ -412,7 +412,7 @@ export const TargetCompanies: React.FC<TargetCompaniesProps> = ({ careerAdvice, 
         </div>
 
         {/* Tiered Company Matches */}
-        <div className="flex flex-col gap-16">
+        <div className="flex flex-col gap-8 sm:gap-16">
           <TierSection
             title="Reach"
             subtitle="Ambitious targets — stretch but achievable"

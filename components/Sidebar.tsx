@@ -5,7 +5,7 @@ import {
   PlusIcon,
   TrashIcon,
   ClockIcon,
-  Bars3BottomLeftIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -98,10 +98,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="fixed left-0 top-0 bottom-0 w-[85vw] sm:w-[280px] max-w-[280px] bg-white dark:bg-[#020617] border-r border-gray-200/50 dark:border-white/5 z-40 flex flex-col"
           >
             {/* Header */}
-            <div className="p-4 border-b border-gray-100 dark:border-white/5">
+            <div className="p-3 sm:p-4 border-b border-gray-100 dark:border-white/5">
+              {/* Mobile close button */}
+              <div className="flex items-center justify-between mb-3 sm:hidden">
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">History</span>
+                <button
+                  onClick={onToggle}
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <XMarkIcon className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
               <button
-                onClick={onNewAnalysis}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-orange-500/10 to-red-500/10 dark:from-orange-500/20 dark:to-red-500/20 border border-orange-200/50 dark:border-orange-500/20 rounded-xl hover:from-orange-500/20 hover:to-red-500/20 dark:hover:from-orange-500/30 dark:hover:to-red-500/30 transition-all text-sm font-medium text-gray-900 dark:text-white"
+                onClick={() => {
+                  onNewAnalysis();
+                  onToggle(); // Close sidebar on mobile after action
+                }}
+                className="w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500/10 to-red-500/10 dark:from-orange-500/20 dark:to-red-500/20 border border-orange-200/50 dark:border-orange-500/20 rounded-xl hover:from-orange-500/20 hover:to-red-500/20 dark:hover:from-orange-500/30 dark:hover:to-red-500/30 transition-all text-sm font-medium text-gray-900 dark:text-white"
               >
                 <PlusIcon className="w-5 h-5 text-orange-500" />
                 New Analysis
@@ -125,8 +138,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           return (
                             <button
                               key={item.id}
-                              onClick={() => onSelect(item)}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors text-left group"
+                              onClick={() => {
+                                onSelect(item);
+                                // Close sidebar on mobile
+                                if (window.innerWidth < 640) {
+                                  onToggle();
+                                }
+                              }}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors text-left group active:bg-gray-200 dark:active:bg-white/10"
                             >
                               {/* Logo or Icon */}
                               {topMatch ? (
@@ -191,11 +210,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </AnimatePresence>
 
       {/* Toggle Button - Aligned with navbar */}
-      <motion.button
+      <button
         onClick={onToggle}
-        animate={{ left: isOpen ? 292 : 24 }}
-        transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="fixed top-[30px] z-50 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-colors"
+        className={`fixed top-[22px] sm:top-[30px] z-50 p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-lg transition-all duration-200 ${
+          isOpen 
+            ? 'left-[calc(85vw+12px)] sm:left-[292px] max-[639px]:left-[min(calc(85vw+12px),292px)]' 
+            : 'left-4 sm:left-6'
+        }`}
       >
         <svg 
           className="w-5 h-5 text-gray-600 dark:text-gray-400" 
@@ -207,7 +228,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <rect x="3" y="3" width="18" height="18" rx="2" />
           <line x1="9" y1="3" x2="9" y2="21" />
         </svg>
-      </motion.button>
+      </button>
 
       {/* Overlay for mobile */}
       <AnimatePresence>
