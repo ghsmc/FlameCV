@@ -432,14 +432,15 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                   key={statusText}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-lg font-semibold text-gray-900 dark:text-white relative inline-block"
+                  className="text-lg font-semibold relative inline-block"
                 >
-                  <span className="relative z-10">Thinking...</span>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/20 -skew-x-12"
-                    animate={{ x: ['-100%', '200%'] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
-                  />
+                  <motion.span
+                    className="bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-orange-500 to-gray-900 dark:from-white dark:via-orange-400 dark:to-white bg-[length:200%_100%]"
+                    animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    Thinking...
+                  </motion.span>
                 </motion.h2>
               </div>
             </div>
