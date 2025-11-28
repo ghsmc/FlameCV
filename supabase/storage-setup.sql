@@ -2,9 +2,10 @@
 -- SUPABASE STORAGE SETUP FOR RESUMES
 -- ============================================
 
--- Create a storage bucket for resumes
+-- Create a storage bucket for resumes (if it doesn't exist)
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('resumes', 'resumes', false);
+VALUES ('resumes', 'resumes', false)
+ON CONFLICT (id) DO NOTHING;
 
 -- Enable RLS on the storage bucket
 CREATE POLICY "Users can upload their own resumes"
