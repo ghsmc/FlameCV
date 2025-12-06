@@ -1,4 +1,5 @@
 -- Create the resumes table
+-- Stores resume metadata and analysis results for Matchpoint users
 CREATE TABLE IF NOT EXISTS resumes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
